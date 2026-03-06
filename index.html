@@ -1,0 +1,2713 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stante - Catálogo Pessoal</title>
+    <style>
+        :root {
+            --bg-color: #141414;
+            --text-color: #ffffff;
+            --accent-color: #E50914;
+            --card-bg: #222;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 0 4%;
+            height: 70px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+            z-index: 1000;
+            transition: background 0.3s;
+        }
+
+        header.scrolled {
+            background: var(--bg-color);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .logo {
+            color: var(--accent-color);
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: none;
+            list-style: none;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .nav-menu {
+                display: flex;
+            }
+        }
+
+        .nav-menu a {
+            color: #e5e5e5;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-menu a:hover {
+            color: #b3b3b3;
+        }
+
+        /* Category Dropdown */
+        .category-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: rgba(20, 20, 20, 0.95);
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 1001;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 10px 0;
+            margin-top: 15px;
+        }
+
+        .dropdown-menu.active {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            background: transparent;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            padding: 5px;
+        }
+
+        .search-container.expanded {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: #fff;
+            padding-right: 10px;
+            border-radius: 8px
+        }
+
+        .search-input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 0;
+            width: 0;
+            outline: none;
+            transition: width 0.3s ease, padding 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .search-container.expanded .search-input {
+            width: 200px;
+            padding: 5px 10px;
+        }
+
+        .search-icon {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            width: 30px;
+            height: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .search-container.expanded .search-input {
+                width: 120px;
+            }
+        }
+
+        /* ================================ */
+        /* NOVO CARROSSEL ESTILO DISNEY+    */
+        /* ================================ */
+        
+        /* O "Embrulho" invisível que ocupa a tela toda */
+        .hero-carousel-wrapper {
+            width: 100%;
+            overflow: hidden;
+            margin-top: 90px;
+            padding-top: 20px; /* Espaço para a sombra não cortar */
+            padding-bottom: 20px;
+            position: relative;
+        }
+
+        /* O "Trilho" onde os cards ficam enfileirados */
+        .hero-carousel-track {
+            display: flex;
+            gap: 20px; /* Distância entre um cartão e outro */
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Deslize bem fluido */
+        }
+
+        /* O Cartão Individual do Filme */
+        .hero-slide {
+            position: relative;
+            flex: 0 0 85%; /* Cada cartão ocupa 85% da tela, revelando as pontas dos outros */
+            flex-shrink: 0;
+            max-width: 1200px;
+            aspect-ratio: 21 / 9; /* Proporção retangular de cinema para Desktop */
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 4% 6%;
+            
+            /* Visual do Cartão */
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            
+            /* Efeito de filme inativo (meio apagado e um pouco menor) */
+            opacity: 0.4;
+            transform: scale(0.95);
+            transition: all 0.6s ease;
+            cursor: pointer;
+        }
+
+        /* Efeito de filme ATIVO (Cresce e fica 100% visível) */
+        .hero-slide.active {
+            opacity: 1;
+            transform: scale(1);
+            z-index: 2;
+            cursor: default;
+        }
+
+        /* Responsividade para Banners */
+        @media (max-width: 767px) {
+            .hero-carousel-wrapper {
+                margin-top: 70px;
+            }
+            .hero-slide {
+                flex: 0 0 88%; /* No mobile, revela um tiquinho menos dos vizinhos para dar mais espaço */
+                background-image: var(--bg-mobile) !important;
+                aspect-ratio: 3 / 4; /* Mantemos o quadrado vertical pro mobile */
+                padding: 0 6% 10%;
+            }
+        }
+        @media (min-width: 768px) {
+            .hero-slide {
+                background-image: var(--bg-desktop) !important;
+            }
+        }
+
+        /* Degrade no fundo do cartão */
+        .hero-slide::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top right, rgba(30, 42, 56, 0.8) 0%, rgba(30, 42, 56, 0.3) 45%, transparent 75%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            padding-bottom: 20px;
+        }
+
+        .hero-title {
+            font-size: clamp(1.5rem, 4vw, 2.5rem); /* Letra ajustada pro novo tamanho do cartão */
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            font-weight: bold;
+        }
+
+        .hero-desc {
+            font-size: clamp(0.85rem, 1.5vw, 1rem); 
+            margin-bottom: 15px;
+            line-height: 1.4;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            color: #e5e5e5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Mostra no máximo 2 linhas de texto pra não poluir o cartão */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Dots Positioning */
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            z-index: 30;
+            margin-bottom: 40px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #fff;
+            transform: scale(1.3);
+        }
+
+        .btn {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #f40612;
+            transform: scale(1.05);
+        }
+        /* Catalog */
+        .catalog {
+            padding: 20px 0;
+            min-height: 50vh;
+            position: relative;
+            z-index: 5;
+            margin-top: -50px;
+        }
+
+        .row {
+            margin-bottom: 40px;
+        }
+
+        .row-title {
+            margin: 0 4% 10px;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        .row-posters {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 4%;
+            scroll-behavior: smooth;
+            gap: 15px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .row-posters::-webkit-scrollbar {
+            display: none;
+        }
+
+        .poster {
+            flex: 0 0 auto;
+            width: 150px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            object-fit: cover;
+            aspect-ratio: 2/3;
+            background-color: var(--card-bg);
+        }
+
+        .poster:hover {
+            transform: scale(1.1);
+            z-index: 2;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+        }
+
+        @media (min-width: 768px) {
+            .poster {
+                width: 200px;
+            }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background-color: var(--bg-color);
+            width: 90%;
+            max-width: 800px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+        }
+
+        @media (min-width: 768px) {
+            .modal {
+                flex-direction: row;
+            }
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            object-position: top;
+        }
+
+        @media (min-width: 768px) {
+            .modal-poster {
+                width: 40%;
+                height: auto;
+            }
+        }
+
+        .modal-info {
+            padding: 30px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-meta {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .modal-meta span {
+            margin-right: 15px;
+        }
+
+        .modal-desc {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .modal-details p {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .modal-details strong {
+            color: #777;
+        }
+
+        .modal-location {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 8px 12px;
+            background-color: rgba(229, 9, 20, 0.2);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Search Results */
+        .search-results-title {
+            margin: 100px 4% 20px;
+            font-size: 1.5rem;
+            display: none;
+        }
+
+        .search-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            padding: 0 4% 40px;
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .search-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        /* Collection Posters */
+        .collection-poster {
+            flex: 0 0 auto;
+            width: 45%; /* Show at least 2 on mobile */
+            min-width: 140px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+            object-fit: cover;
+            aspect-ratio: 16/9;
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .collection-poster:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (min-width: 768px) {
+            .collection-poster { width: 350px; }
+        }
+
+        /* Collection View */
+        .collection-view {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            z-index: 1500;
+            padding-bottom: 50px;
+        }
+
+        .collection-hero {
+            height: 60vh;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 0 4% 5%;
+        }
+
+        .collection-hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, var(--bg-color) 0%, transparent 100%);
+        }
+
+        .collection-title-container {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+            z-index: 10;
+        }
+
+        .collection-title {
+            font-size: 3rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 4%;
+            z-index: 1600;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .search-grid .poster {
+            width: 100%;
+        }
+        
+        /* MUDANÇAS PARA MELHORAR A VISUALIZAÇAO NO MOBILE */
+        @media (max-width: 767px) {
+            /* Aumentar os banners das coleções no mobile */
+            .collection-poster {
+                width: 70%; /* Os banners ocupam 70% da largura da tela no mobile */
+                aspect-ratio: 16/9; /* Mantém a proporção de paisagem */
+            }
+        }
+    </style>
+</head>
+<body>
+    <button id="backToMain" class="back-button" style="display: none;" onclick="closeCollectionView()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Voltar
+    </button>
+    <header>
+        <div class="header-left">
+            <a href="#" class="logo" onclick="resetSearch()">Stante</a>
+            <ul class="nav-menu">
+                <li><a onclick="resetSearch()">Início</a></li>
+                <li><a onclick="filterByType('Filme')">Filmes</a></li>
+                <li><a onclick="filterByType('Série')">Séries</a></li>
+                <li class="category-dropdown">
+                    <a onclick="toggleCategories(event)">Categorias ▾</a>
+                    <div id="categoryDropdown" class="dropdown-menu">
+                        <!-- Categories will be injected here -->
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="header-right">
+            <div class="search-container" id="searchContainer">
+                <div class="search-icon" onclick="toggleSearch()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar títulos...">
+            </div>
+        </div>
+    </header>
+
+    <div class="hero-carousel-wrapper" id="heroCarouselWrapper">
+        <section class="hero-carousel-track" id="heroCarousel">
+            </section>
+    </div>
+    <div class="carousel-dots" id="carouselDots">
+        </div>
+
+        <!-- Slides will be injected by JS -->
+    </section>
+    <div class="carousel-dots" id="carouselDots">
+        <!-- Dots will be injected by JS -->
+    </div>
+
+    <h2 id="searchResultsTitle" class="search-results-title"></h2>
+    <div id="searchGrid" class="search-grid"></div>
+
+    <main id="catalog" class="catalog"></main>
+
+    <div id="collectionView" class="collection-view">
+        <div id="collectionHero" class="collection-hero"></div>
+        <div class="collection-title-container">
+            <h1 id="collectionTitle" class="collection-title"></h1>
+        </div>
+        <div id="collectionGrid" class="search-grid" style="display: grid;"></div>
+    </div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <img id="modalPoster" class="modal-poster" src="" alt="Poster">
+            <div class="modal-info">
+                <h2 id="modalTitle" class="modal-title"></h2>
+                <div class="modal-meta">
+                    <span id="modalYear"></span>
+                    <span id="modalCategory"></span>
+                </div>
+                <p id="modalDesc" class="modal-desc"></p>
+                <div class="modal-details">
+                    <p><strong>Diretor:</strong> <span id="modalDirector"></span></p>
+                    <p><strong>Elenco:</strong> <span id="modalCast"></span></p>
+                </div>
+                <div id="modalLocation" class="modal-location"></div>
+            </div> 
+        </div>
+    </div>
+
+    <script>
+        const movies = [
+            {
+                id: 1,
+                title: "O Iluminado",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1980,
+                director: "Stanley Kubrick",
+                cast: "Jack Nicholson, Shelley Duvall",
+                synopsis: "Um escritor vai trabalhar como vigia de um hotel isolado e começa a perder a sanidade.",
+                location: "Prateleira 1, Fila A",
+                poster: "O iluminado.jpeg",
+                heroImage: "O iluminado.jpeg",
+                heroImageMobile: "O iluminado_mobile.jpeg",
+                featured: true
+            },
+            {
+                id: 101,
+                title: "A Profecia",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1976,
+                director: "Richard Donner",
+                cast: "Gregory Peck, Lee Remick",
+                synopsis: "Um embaixador americano descobre que seu filho adotivo pode ser o Anticristo.",
+                location: "Prateleira 1, Fila A",
+                poster: "A profecia.jpg"
+            },
+            {
+                id: 102,
+                title: "O Enigma de Outro Mundo",
+                category: ["Terror Psicológico", "Sci-Fi"],
+                type: "Filme",
+                year: 1982,
+                director: "John Carpenter",
+                cast: "Kurt Russell, Wilford Brimley",
+                synopsis: "Cientistas na Antártida são caçados por uma criatura alienígena que pode assumir a forma de suas vítimas.",
+                location: "Prateleira 1, Fila A",
+                poster: "The Thing.jpeg"
+            },
+            {
+                id: 103,
+                title: "Extermínio 1",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 2002,
+                director: "Danny Boyle",
+                cast: "Cillian Murphy, Naomie Harris",
+                synopsis: "Quatro semanas após um vírus misterioso e incurável se espalhar pelo Reino Unido, um punhado de sobreviventes tenta encontrar refúgio.",
+                location: "Prateleira 1, Fila A",
+                poster: "Exterminio 1.jpeg"
+            },
+            {
+                id: 12,
+                title: "Cisne Negro",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 2010,
+                director: "Darren Aronofsky",
+                cast: "Natalie Portman, Mila Kunis",
+                synopsis: "Uma bailarina cuja paixão pela dança domina todas as facetas de sua vida.",
+                location: "Prateleira 1, Fila A",
+                poster: "Cisne Negro.jpeg"
+            },
+            {
+                id: 174,
+                title: "Amnésia",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 2000,
+                director: "Christopher Nolan",
+                cast: "Guy Pearce, Carrie-Anne Moss",
+                synopsis: "Um homem com perda de memória recente tenta descobrir quem matou sua esposa.",
+                location: "Gaveta Studio Ghibli",
+                poster: "amnesia.jpg"
+            },
+            {
+                id: 171,
+                title: "De Olhos Bem Fechados",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1999,
+                director: "Stanley Kubrick",
+                cast: "Tom Cruise, Nicole Kidman",
+                synopsis: "Um médico mergulha em uma jornada perturbadora após descobrir segredos sobre desejo e fidelidade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "de olhos bem fechados.jpg"
+            },
+            {
+                id: 135,
+                title: "Laranja Mecânica",
+                category: ["Terror Psicológico", "Sci-Fi"],
+                type: "Filme",
+                year: 1971,
+                director: "Stanley Kubrick",
+                cast: "Malcolm McDowell, Patrick Magee",
+                synopsis: "Em uma sociedade futurista, um jovem violento é submetido a um experimento psicológico para suprimir seus impulsos criminosos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "Laranja Mecanica.jpeg"
+            },
+            {
+                id: 154,
+                title: "Abismo do Medo",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 2005,
+                director: "Neil Marshall",
+                cast: "Shauna Macdonald, Natalie Mendoza",
+                synopsis: "Um grupo de amigas enfrenta criaturas aterrorizantes presas em uma caverna.",
+                location: "Gaveta Studio Ghibli",
+                poster: "abismo do medo.jpg"
+            },
+            {
+                id: 183,
+                title: "Dia dos Mortos",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1985,
+                director: "George A. Romero",
+                cast: "Lori Cardille, Terry Alexander",
+                synopsis: "Sobreviventes de um apocalipse zumbi se refugiam em um bunker enquanto tensões internas ameaçam sua sobrevivência.",
+                location: "Gaveta Studio Ghibli",
+                poster: "dia dos mortos.jpg"
+            },
+            {
+                id: 186,
+                title: "Drácula de Bram Stoker",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1992,
+                director: "Francis Ford Coppola",
+                cast: "Gary Oldman, Winona Ryder",
+                synopsis: "O conde Drácula viaja para a Inglaterra em busca de sua amada reencarnada, espalhando terror pelo caminho.",
+                location: "Gaveta Studio Ghibli",
+                poster: "dracula bram stoker.jpg"
+            },
+            {
+                id: 188,
+                title: "A Hora do Espanto",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1985,
+                director: "Tom Holland",
+                cast: "Chris Sarandon, William Ragsdale",
+                synopsis: "Um adolescente descobre que seu novo vizinho é um vampiro e tenta provar a verdade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "a hora do espanto.jpg"
+
+            },
+            {
+                id: 198,
+                title: "A Morte do Demônio",
+                category: "Terror Psicológico",
+                type: "Filme",
+                year: 1981,
+                director: "Sam Raimi",
+                cast: "Bruce Campbell, Ellen Sandweiss",
+                synopsis: "Jovens libertam forças demoníacas após encontrarem um livro amaldiçoado em uma cabana isolada.",
+                location: "Gaveta Studio Ghibli",
+                poster: "a morte do demonio.jpg"
+            },
+            {
+                id: 203,
+                title: "Blade Runner: O Caçador de Androides",
+                category: ["Terror Psicológico", "Sci-Fi"],
+                type: "Filme",
+                year: 1982,
+                director: "Ridley Scott",
+                cast: "Harrison Ford, Rutger Hauer",
+                synopsis: "Um caçador de androides persegue replicantes fugitivos em uma Los Angeles futurista.",
+                location: "Gaveta Studio Ghibli",
+                poster: "blade runner.jpg"
+            },
+            {
+                id: 208,
+                title: "Prometheus",
+                category: ["Terror Psicológico", "Sci-Fi"],
+                type: "Filme",
+                year: 2012,
+                director: "Ridley Scott",
+                cast: "Noomi Rapace, Michael Fassbender",
+                synopsis: "Uma equipe científica viaja ao espaço em busca das origens da humanidade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "prometheus.jpg"
+            },
+            {
+                id: 2,
+                title: "Pânico",
+                category: "Slasher",
+                type: "Filme",
+                year: 1996,
+                director: "Wes Craven",
+                cast: "Neve Campbell, Courteney Cox",
+                synopsis: "Um assassino mascarado aterroriza adolescentes em uma pequena cidade.",
+                location: "Prateleira 1, Fila B",
+                poster: "Pânico de 1996.jpeg"
+            },
+            {
+                id: 104,
+                title: "Sexta feira 13",
+                category: "Slasher",
+                type: "Filme",
+                year: 1980,
+                director: "Sean S. Cunningham",
+                cast: "Betsy Palmer, Adrienne King",
+                synopsis: "Um grupo de conselheiros de acampamento é assassinado um a um por um assassino desconhecido no acampamento Crystal Lake.",
+                location: "Prateleira 1, Fila B",
+                poster: "sexta feira 13.jpg"
+            },
+            {
+                id: 13,
+                title: "Halloween 1",
+                category: "Slasher",
+                type: "Filme",
+                year: 1978,
+                director: "John Carpenter",
+                cast: "Jamie Lee Curtis, Donald Pleasence",
+                synopsis: "Quinze anos após assassinar sua irmã, Michael Myers foge do hospital psiquiátrico.",
+                location: "Prateleira 1, Fila B",
+                poster: "halloween.jpg"
+            },
+            {
+                id: 185,
+                title: "Pânico 3",
+                category: "Slasher",
+                type: "Filme",
+                year: 2000,
+                director: "Wes Craven",
+                cast: "Neve Campbell, Courteney Cox",
+                synopsis: "Ghostface retorna durante as filmagens de um filme inspirado nos assassinatos anteriores.",
+                location: "Gaveta Studio Ghibli",
+                poster: "panico 3.jpg"
+            },
+            {
+                id: 199,
+                title: "Pânico 2",
+                category: "Slasher",
+                type: "Filme",
+                year: 1997,
+                director: "Wes Craven",
+                cast: "Neve Campbell, Courteney Cox",
+                synopsis: "Um novo assassino mascarado volta a aterrorizar Sidney Prescott.",
+                location: "Gaveta Studio Ghibli",
+                poster: "panico 2.jpg"
+            },
+            {
+                id: 3,
+                title: "Superbad",
+                category: "Comédia",
+                type: "Filme",
+                year: 2007,
+                director: "Greg Mottola",
+                cast: "Jonah Hill, Michael Cera",
+                synopsis: "Dois amigos tentam comprar bebidas para uma festa antes de irem para a faculdade.",
+                location: "Gaveta 2",
+                poster: "superbad.jpg"
+            },
+            {
+                id: 105,
+                title: "Curtindo a Vida Adoidado",
+                category: "Comédia",
+                type: "Filme",
+                year: 1986,
+                director: "John Hughes",
+                cast: "Matthew Broderick, Alan Ruck",
+                synopsis: "Um estudante do ensino médio mata aula e passa o dia em Chicago com seus amigos.",
+                location: "Gaveta 2",
+                poster: "Curtindo a vida adoidado.jpeg"
+            },
+            {
+                id: 155,
+                title: "Todo Mundo Quase Morto",
+                category: "Comédia",
+                type: "Filme",
+                year: 2004,
+                director: "Edgar Wright",
+                cast: "Simon Pegg, Nick Frost",
+                synopsis: "Um homem comum tenta reconquistar a ex-namorada enquanto enfrenta um apocalipse zumbi.",
+                location: "Gaveta Studio Ghibli",
+                poster: "todo mundo quase morto.jpg"
+            },
+            {
+                id: 106,
+                title: "Todo mundo em Pânico 1",
+                category: "Comédia",
+                type: "Filme",
+                year: 2000,
+                director: "Keenen Ivory Wayans",
+                cast: "Anna Faris, Jon Abrahams",
+                synopsis: "Uma paródia de filmes de terror populares dos anos 90.",
+                location: "Gaveta 2",
+                poster: "todo mundo panico 1.jpeg"
+            },
+            {
+                id: 169,
+                title: "Gremlins 2: A Nova Geração",
+                category: "Comédia",
+                type: "Filme",
+                year: 1990,
+                director: "Joe Dante",
+                cast: "Zach Galligan, Phoebe Cates",
+                synopsis: "As criaturas travessas retornam causando caos em um arranha-céu de Nova York.",
+                location: "Gaveta Studio Ghibli",
+                poster: "gremlins 2.jpg"
+            },
+            {
+                id: 168,
+                title: "Arizona Nunca Mais",
+                category: "Comédia",
+                type: "Filme",
+                year: 1987,
+                director: "Joel Coen",
+                cast: "Nicolas Cage, Holly Hunter",
+                synopsis: "Um casal improvável decide sequestrar um bebê em uma comédia absurda.",
+                location: "Gaveta Studio Ghibli",
+                poster: "arizona nunca mais.jpg"
+            },
+            {
+                id: 161,
+                title: "South Park: A Décima Quarta Temporada",
+                category: "Comédia",
+                type: "Série",
+                year: 2010,
+                director: "Trey Parker",
+                cast: "Trey Parker, Matt Stone",
+                synopsis: "A irreverente série animada continua satirizando política e cultura pop.",
+                location: "Gaveta Studio Ghibli",
+                poster: "south park temporada 14.jpg"
+            },
+            {
+                id: 184,
+                title: "O Grande Lebowski",
+                category: "Comédia",
+                type: "Filme",
+                year: 1998,
+                director: "Joel Coen",
+                cast: "Jeff Bridges, John Goodman",
+                synopsis: "Um homem preguiçoso se envolve em uma confusão criminosa após ser confundido com um milionário de mesmo nome.",
+                location: "Gaveta Studio Ghibli",
+                poster: "o grande lebowski.jpg"
+            },
+            {
+                id: 4,
+                title: "Orgulho e Preconceito",
+                category: "Romance",
+                type: "Filme",
+                year: 2005,
+                director: "Joe Wright",
+                cast: "Keira Knightley, Matthew Macfadyen",
+                synopsis: "A história de Elizabeth Bennet e seu relacionamento com o Sr. Darcy.",
+                location: "Prateleira 3, Fila C",
+                poster: "pride & prejudice.jpeg"
+            },
+            {
+                id: 107,
+                title: "Noiva em Fuga",
+                category: "Romance",
+                type: "Filme",
+                year: 1999,
+                director: "Garry Marshall",
+                cast: "Julia Roberts, Richard Gere",
+                synopsis: "Um repórter é designado para escrever uma história sobre uma mulher que deixou vários noivos no altar.",
+                location: "Prateleira 3, Fila C",
+                poster: "noiva em fuga.jpg"
+            },
+            {
+                id: 156,
+                title: "Ghost - Do Outro Lado da Vida",
+                category: "Romance",
+                type: "Filme",
+                year: 1990,
+                director: "Jerry Zucker",
+                cast: "Patrick Swayze, Demi Moore",
+                synopsis: "Um homem assassinado tenta proteger sua amada enquanto permanece preso entre o mundo dos vivos e dos mortos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "ghost do outro lado da vida.jpg"
+            },
+            {
+                id: 163,
+                title: "Cinderela",
+                category: "Romance",
+                type: "Filme",
+                year: 2015,
+                director: "Kenneth Branagh",
+                cast: "Lily James, Cate Blanchett",
+                synopsis: "Uma jovem órfã encontra esperança e amor com a ajuda de sua fada madrinha em uma releitura live-action do clássico conto de fadas.",
+                location: "Gaveta Studio Ghibli",
+                poster: "cinderela 2015.jpg"
+            },
+            {
+                id: 151,
+                title: "Doutor Jivago",
+                category: "Romance",
+                type: "Filme",
+                year: 1965,
+                director: "David Lean",
+                cast: "Omar Sharif, Julie Christie",
+                synopsis: "Um médico e poeta vive um romance intenso em meio à Revolução Russa.",
+                location: "Gaveta Studio Ghibli",
+                poster: "doutor jivago.jpg"
+            },
+            {
+                id: 211,
+                title: "Vicky Cristina Barcelona",
+                category: "Romance",
+                type: "Filme",
+                year: 2008,
+                director: "Woody Allen",
+                cast: "Scarlett Johansson, Penélope Cruz",
+                synopsis: "Duas amigas vivem romances intensos e complicados durante um verão na Espanha.",
+                location: "Gaveta Studio Ghibli",
+                poster: "vicky cristina barcelona.jpg"
+             },
+             {
+                id: 207,
+                title: "Edward Mãos de Tesoura",
+                category: "Romance",
+                type: "Filme",
+                year: 1990,
+                director: "Tim Burton",
+                cast: "Johnny Depp, Winona Ryder",
+                synopsis: "Um jovem com tesouras no lugar das mãos tenta se adaptar à vida em sociedade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "edward maos de tesoura.jpg"
+            },
+            {
+                id: 5,
+                title: "Mad Max: Estrada da Fúria",
+                category: "Ação",
+                type: "Filme",
+                year: 2015,
+                director: "George Miller",
+                cast: "Tom Hardy, Charlize Theron",
+                synopsis: "Em um mundo pós-apocalíptico, uma mulher se rebela contra um governante tirano em busca de sua terra natal.",
+                location: "Prateleira 2, Fila A",
+                poster: "estrada da furia.jpeg",
+                heroImage: "estrada da furia.jpeg",
+                heroImageMobile: "estrada da furia_mobile.jpeg",
+            },
+            {
+                id: 172,
+                title: "Kill Bill: Volume 1",
+                category: "Ação",
+                type: "Filme",
+                year: 2003,
+                director: "Quentin Tarantino",
+                cast: "Uma Thurman, Lucy Liu",
+                synopsis: "Uma ex-assassina busca vingança contra seus antigos parceiros após ser traída.",
+                location: "Gaveta Studio Ghibli",
+                poster: "kill bill vol 1.jpg"
+            },
+            {
+                id: 173,
+                title: "Kill Bill: Volume 2",
+                category: "Ação",
+                type: "Filme",
+                year: 2004,
+                director: "Quentin Tarantino",
+                cast: "Uma Thurman, David Carradine",
+                synopsis: "A Noiva continua sua jornada de vingança em busca do enigmático Bill.",
+                location: "Gaveta Studio Ghibli",
+                poster: "kill bill vol 2.jpg"
+            },
+            {
+                id: 179,
+                title: "O Exterminador do Futuro 2: O Julgamento Final",
+                category: ["Ação", "Sci-Fi"],
+                type: "Filme",
+                year: 1991,
+                director: "James Cameron",
+                cast: "Arnold Schwarzenegger, Linda Hamilton",
+                synopsis: "Um ciborgue retorna do futuro para proteger o jovem John Connor de uma nova ameaça.",
+                location: "Gaveta Studio Ghibli",
+                poster: "exterminador do futuro 2.jpg"
+            },
+            {
+                id: 181,
+                title: "Rambo - Edição Definitiva",
+                category: "Ação",
+                type: "Filme",
+                year: 1982,
+                director: "Ted Kotcheff",
+                cast: "Sylvester Stallone, Richard Crenna",
+                synopsis: "Um veterano do Vietnã enfrenta autoridades locais após ser injustamente perseguido.",
+                location: "Gaveta Studio Ghibli",
+                poster: "rambo edicao definitiva.jpg",
+                featured: true
+            },
+             {
+                id: 212,
+                title: "Missão: Impossível",
+                category: "Ação",
+                type: "Filme",
+                year: 1996,
+                director: "Brian De Palma",
+                cast: "Tom Cruise, Jon Voight",
+                synopsis: "Ethan Hunt é acusado injustamente de traição e precisa descobrir o verdadeiro traidor enquanto tenta limpar seu nome.",
+                location: "Gaveta Studio Ghibli",
+                poster: "missao impossivel 1.jpg"
+            },
+            {
+                id: 213,
+                title: "Missão: Impossível 2",
+                category: "Ação",
+                type: "Filme",
+                year: 2000,
+                director: "John Woo",
+                cast: "Tom Cruise, Dougray Scott",
+                synopsis: "Ethan Hunt enfrenta um ex-agente que ameaça liberar um vírus mortal, colocando o mundo em risco.",
+                location: "Gaveta Studio Ghibli",
+                poster: "missao impossivel 2.jpg"
+            },
+            {
+                id: 180,
+                title: "Os Infiltrados",
+                category: "Ação",
+                type: "Filme",
+                year: 2006,
+                director: "Martin Scorsese",
+                cast: "Leonardo DiCaprio, Matt Damon",
+                synopsis: "Um policial infiltrado na máfia e um criminoso infiltrado na polícia tentam descobrir a identidade um do outro.",
+                location: "Gaveta Studio Ghibli",
+                poster: "os infiltrados.jpg"
+            },
+            {
+                id: 191,
+                title: "Sete Homens e um Destino",
+                category: "Ação",
+                type: "Filme",
+                year: 1960,
+                director: "John Sturges",
+                cast: "Yul Brynner, Steve McQueen",
+                synopsis: "Sete pistoleiros são contratados para proteger uma pequena vila mexicana de bandidos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "sete homens e um destino.jpg"
+            },
+            {
+                id: 204,
+                title: "Top Gun: Ases Indomáveis",
+                category: "Ação",
+                type: "Filme",
+                year: 1986,
+                director: "Tony Scott",
+                cast: "Tom Cruise, Kelly McGillis",
+                synopsis: "Um piloto talentoso treina na escola de elite da Marinha americana.",
+                location: "Gaveta Studio Ghibli",
+                poster: "top gun.jpg"
+            },
+            {
+                id: 108,
+                title: "Duro de Matar 2",
+                category: "Ação",
+                type: "Filme",
+                year: 1990,
+                director: "Renny Harlin",
+                cast: "Bruce Willis, Bonnie Bedelia",
+                synopsis: "John McClane deve impedir terroristas que tomaram o controle de um aeroporto.",
+                location: "Prateleira 2, Fila A",
+                poster: "Duro de Matar 2.jpeg"
+            },
+            {
+                id: 109,
+                title: "Duro de Matar 3",
+                category: "Ação",
+                type: "Filme",
+                year: 1995,
+                director: "John McTiernan",
+                cast: "Bruce Willis, Samuel L. Jackson",
+                synopsis: "John McClane e um lojista do Harlem devem impedir um terrorista de explodir bombas em Nova York.",
+                location: "Prateleira 2, Fila A",
+                poster: "duro de matar 3.jpg"
+            },
+            {
+                id: 110,
+                title: "Tropa de Elite 2",
+                category: "Ação",
+                type: "Filme",
+                year: 2010,
+                director: "José Padilha",
+                cast: "Wagner Moura, Irandhir Santos",
+                synopsis: "Nascimento enfrenta o sistema e as milícias no Rio de Janeiro.",
+                location: "Prateleira 2, Fila A",
+                poster: "Tropa de elite 2 (2010).jpeg"
+            },
+            {
+                id: 111,
+                title: "Operação França",
+                category: "Ação",
+                type: "Filme",
+                year: 1971,
+                director: "William Friedkin",
+                cast: "Gene Hackman, Roy Scheider",
+                synopsis: "Dois detetives de Nova York tentam interceptar um carregamento de heroína vindo da França.",
+                location: "Prateleira 2, Fila A",
+                poster: "operaçao frança.jpg"
+            },
+            {
+                id: 112,
+                title: "Butch Cassidy",
+                category: "Ação",
+                type: "Filme",
+                year: 1969,
+                director: "George Roy Hill",
+                cast: "Paul Newman, Robert Redford",
+                synopsis: "Dois foras-da-lei fogem para a Bolívia para escapar de um esquadrão implacável.",
+                location: "Prateleira 2, Fila A",
+                poster: "Butch Cassidy and the Sundance Kid (1969) Film Poster.jpeg"
+            },
+            {
+                id: 113,
+                title: "Bastardos Inglórios",
+                category: "Ação",
+                type: "Filme",
+                year: 2009,
+                director: "Quentin Tarantino",
+                cast: "Brad Pitt, Diane Kruger",
+                synopsis: "Na França ocupada pelos nazistas, um grupo de soldados judeus americanos planeja assassinar líderes nazistas.",
+                location: "Prateleira 2, Fila A",
+                poster: "bastardos inglorios.jpeg"
+            },
+            {
+                id: 114,
+                title: "007 Golden Eye",
+                category: "Ação",
+                type: "Filme",
+                year: 1995,
+                director: "Martin Campbell",
+                cast: "Pierce Brosnan, Sean Bean",
+                synopsis: "James Bond tenta impedir um sindicato do crime de usar uma arma de satélite contra Londres.",
+                location: "Prateleira 2, Fila A",
+                poster: "007 golden eye.jpg"
+             },
+             {
+                id: 190,
+                title: "007: Viva e Deixe Morrer",
+                category: "Ação",
+                type: "Filme",
+                year: 1973,
+                director: "Guy Hamilton",
+                cast: "Roger Moore, Yaphet Kotto",
+                synopsis: "James Bond investiga um poderoso traficante envolvido com rituais de vodu e uma conspiração internacional.",
+                location: "Gaveta Studio Ghibli",
+                poster: "007 viva e deixe morrer.jpg"
+            },
+            {
+                id: 115,
+                title: "007 Operação Skyfall",
+                category: "Ação",
+                type: "Filme",
+                year: 2012,
+                director: "Sam Mendes",
+                cast: "Daniel Craig, Javier Bardem",
+                synopsis: "A lealdade de Bond a M é testada quando seu passado volta para assombrá-la.",
+                location: "Prateleira 2, Fila A",
+                poster: "SKYFALL.jpeg"
+            },
+            {
+                id: 201,
+                title: "Breaking Bad",
+                category: "Ação",
+                type: "Série",
+                year: 2008,
+                director: "Vince Gilligan",
+                cast: "Bryan Cranston, Aaron Paul",
+                synopsis: "Um professor de química se torna um traficante de metanfetamina após ser diagnosticado com câncer.",
+                location: "Digital",
+                poster: "https://picsum.photos/seed/breakingbad/400/600"
+            },
+            {
+                id: 6,
+                title: "Indiana Jones e Os Caçadores da Arca Perdida",
+                category: "Aventura",
+                type: "Filme",
+                year: 1981,
+                director: "Steven Spielberg",
+                cast: "Harrison Ford, Karen Allen",
+                synopsis: "O arqueólogo Indiana Jones é contratado para encontrar a Arca da Aliança antes dos nazistas.",
+                location: "Box Set Aventura",
+                poster: "caçadores da arca perdida.jpeg"
+            },
+            {
+                id: 136,
+                title: "2001: Uma Odisseia no Espaço",
+                category: ["Aventura", "Sci-Fi"],
+                type: "Filme",
+                year: 1968,
+                director: "Stanley Kubrick",
+                cast: "Keir Dullea, Gary Lockwood",
+                synopsis: "Uma missão espacial rumo a Júpiter se transforma em uma jornada filosófica sobre a evolução humana e o desconhecido.",
+                location: "Gaveta Studio Ghibli",
+                poster: "2001 uma odisseia no espaço].jpeg"
+            },
+            {
+                id: 118,
+                title: "O Cavalo de Guerra",
+                category: "Aventura",
+                type: "Filme",
+                year: 2011,
+                director: "Steven Spielberg",
+                cast: "Jeremy Irvine, Emily Watson",
+                synopsis: "A jornada de um cavalo e seu jovem dono durante a Primeira Guerra Mundial.",
+                location: "Box Set Aventura",
+                poster: "cavalo de guerra.jpg"
+            },
+            {
+                id: 119,
+                title: "As Aventuras de Pi",
+                category: "Aventura",
+                type: "Filme",
+                year: 2012,
+                director: "Ang Lee",
+                cast: "Suraj Sharma, Irrfan Khan",
+                synopsis: "Um jovem sobrevive a um naufrágio e compartilha um bote salva-vidas com um tigre de Bengala.",
+                location: "Box Set Aventura",
+                poster: "as aventuras de pi.jpg"
+            },
+            {
+                id: 120,
+                title: "O Senhor dos Anéis: A Sociedade do Anel",
+                category: "Aventura",
+                type: "Filme",
+                year: 2001,
+                director: "Peter Jackson",
+                cast: "Elijah Wood, Ian McKellen",
+                synopsis: "Um hobbit e seus companheiros partem em uma jornada para destruir um anel poderoso.",
+                location: "Box Set Aventura",
+                poster: "a sociedade do anel.jpg",
+                heroImage: "a sociedade do anel.jpg",
+                heroImageMobile: "a sociedade do anel_mobile.jpg"
+            },
+            {
+                id: 121,
+                title: "O Senhor dos Anéis: as Duas Torres",
+                category: "Aventura",
+                type: "Filme",
+                year: 2002,
+                director: "Peter Jackson",
+                cast: "Elijah Wood, Ian McKellen",
+                synopsis: "Frodo e Sam continuam sua jornada para Mordor enquanto seus amigos enfrentam novas ameaças.",
+                location: "Box Set Aventura",
+                poster: "as duas torres.jpg"
+            },
+            {
+                id: 122,
+                title: "O Senhor dos Anéis: o Retorno do Rei",
+                category: "Aventura",
+                type: "Filme",
+                year: 2003,
+                director: "Peter Jackson",
+                cast: "Elijah Wood, Ian McKellen",
+                synopsis: "A batalha final pela Terra Média começa enquanto Frodo e Sam se aproximam da Montanha da Perdição.",
+                location: "Box Set Aventura",
+                poster: "o retorno do rei.jpg"
+            },
+            {
+                id: 175,
+                title: "O Dia Depois de Amanhã",
+                category: "Aventura",
+                type: "Filme",
+                year: 2004,
+                director: "Roland Emmerich",
+                cast: "Dennis Quaid, Jake Gyllenhaal",
+                synopsis: "Mudanças climáticas extremas desencadeiam uma nova era glacial no planeta.",
+                location: "Gaveta Studio Ghibli",
+                poster: "o dia depois de amanha.jpg"
+            },
+            {
+                id: 176,
+                title: "Arquivo X: O Filme",
+                category: ["Aventura", "Sci-Fi"],
+                type: "Filme",
+                year: 1998,
+                director: "Rob Bowman",
+                cast: "David Duchovny, Gillian Anderson",
+                synopsis: "Mulder e Scully investigam uma conspiração alienígena que ameaça a humanidade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "arquivo x o filme.jpg"
+            },
+            {
+                id: 123,
+                title: "Star Wars 4: Uma Nova Esperança",
+                category: ["Aventura", "Sci-Fi"],
+                type: "Filme",
+                year: 1977,
+                director: "George Lucas",
+                cast: "Mark Hamill, Harrison Ford",
+                synopsis: "Luke Skywalker se junta a um cavaleiro Jedi e um piloto para salvar a galáxia da Estrela da Morte.",
+                location: "Box Set Aventura",
+                poster: "uma nova esperança.jpg"
+            },
+            {
+                id: 124,
+                title: "Mad Max: Estrada da Furia",
+                category: "Aventura",
+                type: "Filme",
+                year: 2015,
+                director: "George Miller",
+                cast: "Harrison Ford, Karen Allen",
+                synopsis: "Max acredita que a melhor forma de sobreviver é não depender de ninguém. Porém, após ser capturado pelo tirano Immortan Joe e seus rebeldes, se vê numa guerra mortal iniciada pela Imperatriz Furiosa, que tenta salvar um grupo de garotas.",
+                location: "Box Set Aventura",
+                poster: "estrada da furia.jpeg"
+            },
+            {
+                id: 125,
+                title: "Indiana Jones e o Templo da Perdiçao",
+                category: "Aventura",
+                type: "Filme",
+                year: 1984,
+                director: "Steven Spielberg",
+                cast: "Harrison Ford, Kate Capshaw",
+                synopsis: "Indiana Jones viaja para a Índia para encontrar uma pedra mística e salvar crianças escravizadas.",
+                location: "Box Set Aventura",
+                poster: "IJ 2 templo da perdiçao.jpg"
+            },
+            {
+                id: 126,
+                title: "Indiana Jones e a Ultima Cruzada",
+                category: "Aventura",
+                type: "Filme",
+                year: 1989,
+                director: "Steven Spielberg",
+                cast: "Harrison Ford, Sean Connery",
+                synopsis: "Indiana Jones parte em busca de seu pai desaparecido e do Santo Graal.",
+                location: "Box Set Aventura",
+                poster: "ij 3 e a ultima cruzada.jpg"
+            },
+            {
+                id: 127,
+                title: "Indiana Jones e o Reino da Cave",
+                category: "Aventura",
+                type: "Filme",
+                year: 2008,
+                director: "Steven Spielberg",
+                cast: "Harrison Ford, Cate Blanchett",
+                synopsis: "Indiana Jones se envolve em uma conspiração soviética para encontrar caveiras de cristal místicas.",
+                location: "Box Set Aventura",
+                poster: "IJ 4 reino da caveira de cristal.jpg"
+            },
+            {
+                id: 165,
+                title: "Jornada nas Estrelas II: A Ira de Khan",
+                category: "Aventura",
+                type: "Filme",
+                year: 1982,
+                director: "Nicholas Meyer",
+                cast: "William Shatner, Ricardo Montalbán",
+                synopsis: "O capitão Kirk enfrenta o vingativo Khan em um confronto decisivo que coloca a Enterprise em risco.",
+                location: "Gaveta Studio Ghibli",
+                poster: "jornada nas estrelas a ira de khan.jpg"
+            },
+            {
+                id: 116,
+                title: "A Joia do Nilo",
+                category: "Aventura",
+                type: "Filme",
+                year: 1985,
+                director: "Lewis Teague",
+                cast: "Michael Douglas, Kathleen Turner",
+                synopsis: "Uma romancista e um aventureiro se envolvem em uma busca perigosa por uma joia no deserto africano.",
+                location: "Box Set Aventura",
+                poster: "a joia do nilo.jpg"
+            },
+            {
+                id: 117,
+                title: "Cruzada",
+                category: "Aventura",
+                type: "Filme",
+                year: 2005,
+                director: "Ridley Scott",
+                cast: "Orlando Bloom, Eva Green",
+                synopsis: "Um ferreiro viaja para Jerusalém durante as Cruzadas do século XII.",
+                location: "Box Set Aventura",
+                poster: "cruzada.jpg"
+            },
+            {
+                id: 214,
+                title: "Eu Sou o Número Quatro",
+                category: "Aventura",
+                type: "Filme",
+                year: 2011,
+                director: "D.J. Caruso",
+                cast: "Alex Pettyfer, Timothy Olyphant",
+                synopsis: "Um jovem alienígena refugiado na Terra descobre seus poderes enquanto foge de inimigos intergalácticos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "eu sou o numero quatro.jpg"
+            },
+             {
+                id: 202,
+                title: "Stranger Things",
+                category: "Aventura",
+                type: "Série",
+                year: 2016,
+                director: "The Duffer Brothers",
+                cast: "Millie Bobby Brown, Finn Wolfhard",
+                synopsis: "Um grupo de amigos enfrenta forças sobrenaturais em sua pequena cidade.",
+                location: "Digital",
+                poster: "https://picsum.photos/seed/strangerthings/400/600"
+            },
+            {
+                id: 200,
+                title: "Gravidade",
+                category: ["Aventura", "Sci-Fi"],
+                type: "Filme",
+                year: 2013,
+                director: "Alfonso Cuarón",
+                cast: "Sandra Bullock, George Clooney",
+                synopsis: "Astronautas lutam para sobreviver após um desastre no espaço.",
+                location: "Gaveta Studio Ghibli",
+                poster: "gravidade.jpg"
+            },
+            {
+                id: 209,
+                title: "Avatar",
+                category: ["Aventura", "Sci-Fi"],
+                type: "Filme",
+                year: 2009,
+                director: "James Cameron",
+                cast: "Sam Worthington, Zoe Saldana",
+                synopsis: "Um ex-fuzileiro é enviado ao planeta Pandora e se envolve em um conflito entre humanos e nativos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "avatar.jpg"
+            },
+            {
+                id: 7,
+                title: "Vida Secreta de Walter Smith",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2013,
+                director: "Ben Stiller",
+                cast: "Ben Stiller, Kristen Wiig",
+                synopsis: "Um homem tímido embarca em uma aventura global que transforma sua vida.",
+                location: "Prateleira 4, Fila B",
+                poster: "a vida secreta de walter mitty.jpg"
+            },
+            {
+                id: 153,
+                title: "O Aviador",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2004,
+                director: "Martin Scorsese",
+                cast: "Leonardo DiCaprio, Cate Blanchett",
+                synopsis: "A trajetória do excêntrico milionário Howard Hughes na aviação e no cinema.",
+                location: "Gaveta Studio Ghibli",
+                poster: "o aviador.jpg"
+            },
+            {
+                id: 178,
+                title: "Touro Indomável",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 1980,
+                director: "Martin Scorsese",
+                cast: "Robert De Niro, Joe Pesci",
+                synopsis: "A ascensão e queda do boxeador Jake LaMotta dentro e fora dos ringues.",
+                location: "Gaveta Studio Ghibli",
+                poster: "touro indomavel.jpg"
+            },
+            {
+                id: 177,
+                title: "Sangue Negro",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2007,
+                director: "Paul Thomas Anderson",
+                cast: "Daniel Day-Lewis, Paul Dano",
+                synopsis: "Um ambicioso empresário do petróleo enfrenta conflitos morais e religiosos em sua busca por poder.",
+                location: "Gaveta Studio Ghibli",
+                poster: "sangue negro.jpg"
+            },
+            {
+                id: 130,
+                title: "O Grande Truque",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2006,
+                director: "Christopher Nolan",
+                cast: "Hugh Jackman, Christian Bale",
+                synopsis: "Dois mágicos rivais competem para criar a ilusão final, sacrificando tudo no processo.",
+                location: "Prateleira 4, Fila B",
+                poster: "o grande truque.jpg"
+            },
+            {
+                id: 131,
+                title: "Cosmópolis",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2012,
+                director: "David Cronenberg",
+                cast: "Robert Pattinson, Juliette Binoche",
+                synopsis: "Um bilionário atravessa Manhattan em sua limusine para cortar o cabelo enquanto seu mundo desmorona.",
+                location: "Prateleira 4, Fila B",
+                poster: "cosmopolis.jpg"
+            },
+             {
+                id: 182,
+                title: "Rocky: Um Lutador",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 1976,
+                director: "John G. Avildsen",
+                cast: "Sylvester Stallone, Talia Shire",
+                synopsis: "Um boxeador desconhecido recebe a chance de disputar o título mundial e transforma sua vida através da determinação.",
+                location: "Gaveta Studio Ghibli",
+                poster: "rocky um lutador.jpg"
+            },
+            {
+                id: 201,
+                title: "Piaf: Um Hino ao Amor",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2007,
+                director: "Olivier Dahan",
+                cast: "Marion Cotillard, Gérard Depardieu",
+                synopsis: "A trajetória intensa da cantora francesa Édith Piaf.",
+                location: "Gaveta Studio Ghibli",
+                poster: "piaf um hino ao amor.jpg"
+            },
+            {
+                id: 206,
+                title: "Taxi Driver",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 1976,
+                director: "Martin Scorsese",
+                cast: "Robert De Niro, Jodie Foster",
+                synopsis: "Um taxista solitário mergulha em paranoia e violência nas ruas de Nova York.",
+                location: "Gaveta Studio Ghibli",
+                poster: "taxi driver.jpg"
+            },
+            {
+                id: 128,
+                title: "O Escafandro e a Borboleta",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2007,
+                director: "Julian Schnabel",
+                cast: "Mathieu Amalric, Emmanuelle Seigner",
+                synopsis: "A história real de Jean-Dominique Bauby, que sofreu um derrame e aprendeu a se comunicar piscando o olho esquerdo.",
+                location: "Prateleira 4, Fila B",
+                poster: "o escafandro e a borboleta.jpg"
+            },
+            {
+                id: 129,
+                title: "Diamante de Sangue",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2006,
+                director: "Edward Zwick",
+                cast: "Leonardo DiCaprio, Djimon Hounsou",
+                synopsis: "Um pescador, um contrabandista e uma jornalista se unem para recuperar um diamante raro na Serra Leoa.",
+                location: "Prateleira 4, Fila B",
+                poster: "diamante de sangue.webp"
+            },
+             {
+                id: 157,
+                title: "Flores Partidas",
+                category: "Life-Change Movies",
+                type: "Filme",
+                year: 2005,
+                director: "Jim Jarmusch",
+                cast: "Bill Murray, Jessica Lange",
+                synopsis: "Um homem solitário revisita antigos relacionamentos ao descobrir que pode ter um filho desconhecido.",
+                location: "Gaveta Studio Ghibli",
+                poster: "flores partidas.jpg"
+            },
+            {
+                id: 167,
+                title: "Carros 3",
+                category: "Animações",
+                type: "Filme",
+                year: 2017,
+                director: "Brian Fee",
+                cast: "Owen Wilson, Cristela Alonzo",
+                synopsis: "Relâmpago McQueen busca provar que ainda pode competir contra uma nova geração de pilotos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "carros 3.jpg"
+            },
+            {
+                id: 132,
+                title: "Shrek 2",
+                category: "Animações",
+                type: "Filme",
+                year: 2004,
+                director: "Andrew Adamson",
+                cast: "Mike Myers, Eddie Murphy",
+                synopsis: "Shrek e Fiona viajam para o Reino de Tão Tão Distante para conhecer os pais dela.",
+                location: "Gaveta Studio Ghibli",
+                poster: "shrek 2.jpg"
+            },
+            {
+                id: 152,
+                title: "Os Incríveis",
+                category: "Animações",
+                type: "Filme",
+                year: 2004,
+                director: "Brad Bird",
+                cast: "Craig T. Nelson, Holly Hunter",
+                synopsis: "Uma família de super-heróis precisa voltar à ação para salvar o mundo.",
+                location: "Gaveta Studio Ghibli",
+                poster: "os incriveis.jpg"
+            },
+            {
+                id: 134,
+                title: "Lilo & Stich",
+                category: "Animações",
+                type: "Filme",
+                year: 2002,
+                director: "Chris Sanders",
+                cast: "Daveigh Chase, Chris Sanders",
+                synopsis: "Uma garota havaiana adota um alienígena travesso como seu animal de estimação.",
+                location: "Gaveta Studio Ghibli",
+                poster: "lilo e stitch.jpg"
+            },
+            {
+                id: 218,
+                title: "Vida de Inseto",
+                category: "Animações",
+                type: "Filme",
+                year: 1998,
+                director: "John Lasseter",
+                cast: "Dave Foley, Kevin Spacey",
+                synopsis: "Uma formiga recruta guerreiros para salvar sua colônia de gafanhotos famintos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "vida de inseto.jpg"
+            },
+            {
+                id: 8,
+                title: "A Viagem de Chihiro",
+                category: "Animações",
+                type: "Filme",
+                year: 2001,
+                director: "Hayao Miyazaki",
+                cast: "Rumi Hiiragi, Miyu Irino",
+                synopsis: "Uma garota entra em um mundo de deuses e espíritos para salvar seus pais.",
+                location: "Gaveta Studio Ghibli",
+                poster: "viagem chihiro.jpg"
+            },
+            {
+                id: 215,
+                title: "Evangelion: 1.11 You Are (Not) Alone",
+                category: "Animações",
+                type: "Filme",
+                year: 2007,
+                director: "Hideaki Anno",
+                cast: "Megumi Ogata, Megumi Hayashibara",
+                synopsis: "Shinji Ikari é recrutado para pilotar uma arma biomecânica contra criaturas misteriosas conhecidas como Anjos.",
+                location: "Gaveta Studio Ghibli",
+                poster: "evangelion 1.11.jpg"
+            },
+            {
+                id: 216,
+                title: "Evangelion: 2.22 You Can (Not) Advance",
+                category: "Animações",
+                type: "Filme",
+                year: 2009,
+                director: "Hideaki Anno",
+                cast: "Megumi Ogata, Yuko Miyamura",
+                synopsis: "Novos pilotos e revelações ampliam o conflito contra os Anjos em uma batalha cada vez mais intensa.",
+                location: "Gaveta Studio Ghibli",
+                poster: "evangelion 2.22.jpg"
+            },
+            {
+                id: 11,
+                title: "Toy Story",
+                category: "Animações",
+                type: "Filme",
+                year: 1995,
+                director: "John Lasseter",
+                cast: "Tom Hanks, Tim Allen",
+                synopsis: "Um boneco cowboy se sente ameaçado quando um novo brinquedo espacial chega ao quarto.",
+                location: "Gaveta Kids",
+                poster: "toy story 1.jpg"
+            },
+            {
+                id: 187,
+                title: "Meu Malvado Favorito 2",
+                category: "Animações",
+                type: "Filme",
+                year: 2013,
+                director: "Pierre Coffin",
+                cast: "Steve Carell, Kristen Wiig",
+                synopsis: "Gru é recrutado para ajudar a capturar um novo vilão enquanto tenta equilibrar sua vida como pai.",
+                location: "Gaveta Studio Ghibli",
+                poster: "meu malvado favorito 2.jpg"
+            },
+             {
+                id: 192,
+                title: "Bob Esponja: O Filme",
+                category: "Animações",
+                type: "Filme",
+                year: 2004,
+                director: "Stephen Hillenburg",
+                cast: "Tom Kenny, Bill Fagerbakke",
+                synopsis: "Bob Esponja embarca em uma aventura para recuperar a coroa roubada do Rei Netuno.",
+                location: "Gaveta Studio Ghibli",
+                poster: "bob esponja o filme.jpg"
+            },
+            {
+                id: 195,
+                title: "Memories",
+                category: "Animações",
+                type: "Filme",
+                year: 1995,
+                director: "Katsuhiro Otomo",
+                cast: "Vários",
+                synopsis: "Antologia animada com três histórias de ficção científica produzidas no Japão.",
+                location: "Gaveta Studio Ghibli",
+                poster: "memories.jpg"
+            },
+            {
+                id: 196,
+                title: "WALL·E",
+                category: "Animações",
+                type: "Filme",
+                year: 2008,
+                director: "Andrew Stanton",
+                cast: "Ben Burtt, Elissa Knight",
+                synopsis: "Um robô solitário que limpa a Terra devastada embarca em uma jornada espacial inesperada.",
+                location: "Gaveta Studio Ghibli",
+                poster: "wall e.jpg"
+            },
+            {
+                id: 197,
+                title: "Final Fantasy",
+                category: "Animações",
+                type: "Filme",
+                year: 2001,
+                director: "Hironobu Sakaguchi",
+                cast: "Ming-Na Wen, Alec Baldwin",
+                synopsis: "Em um futuro pós-apocalíptico, cientistas tentam salvar a Terra de criaturas alienígenas.",
+                location: "Gaveta Studio Ghibli",
+                poster: "final fantasy.jpg"
+            },
+             {
+                id: 205,
+                title: "Akira",
+                category: ["Animações", "Sci-Fi"],
+                type: "Filme",
+                year: 1988,
+                director: "Katsuhiro Otomo",
+                cast: "Mitsuo Iwata, Nozomu Sasaki",
+                synopsis: "Em uma Neo-Tóquio pós-apocalíptica, poderes psíquicos ameaçam a humanidade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "akira.jpg"
+            },
+            {
+                id: 217,
+                title: "Fuga das Galinhas",
+                category: "Animações",
+                type: "Filme",
+                year: 2000,
+                director: "Peter Lord",
+                cast: "Julia Sawalha, Mel Gibson",
+                synopsis: "Um grupo de galinhas tenta escapar de uma fazenda antes de serem transformadas em tortas.",
+                location: "Gaveta Studio Ghibli",
+                poster: "fuga das galinhas.jpg"
+            },
+            {
+                id: 162,
+                title: "Operação Presente",
+                category: "Animações",
+                type: "Filme",
+                year: 2011,
+                director: "Sarah Smith",
+                cast: "James McAvoy, Hugh Laurie",
+                synopsis: "O filho do Papai Noel parte em uma missão urgente para entregar um presente esquecido.",
+                location: "Gaveta Studio Ghibli",
+                poster: "operacao presente.jpg"
+            },
+            {
+                id: 219,
+                title: "Titan A.E.",
+                category: "Animações",
+                type: "Filme",
+                year: 2000,
+                director: "Don Bluth",
+                cast: "Matt Damon, Drew Barrymore",
+                synopsis: "Após a destruição da Terra, um jovem parte em busca de uma nave capaz de salvar a humanidade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "titan ae.jpg"
+            },
+            {
+                id: 133,
+                title: "Tigrão",
+                category: "Infantil",
+                type: "Filme",
+                year: 2000,
+                director: "Jun Falkenstein",
+                cast: "Jim Cummings, Nikita Hopkins",
+                synopsis: "Tigrão sai em busca de sua família no Bosque dos Cem Acres.",
+                location: "Gaveta Studio Ghibli",
+                poster: "tigrao o filme.jpg"
+
+            },
+             {
+                id: 220,
+                title: "Pingu - Novas Amizades",
+                category: "Infantil",
+                type: "Filme",
+                year: 2004,
+                director: "Otmar Gutmann",
+                cast: "Carlo Bonomi",
+                synopsis: "O simpático pinguim vive novas aventuras e aprende sobre amizade.",
+                location: "Gaveta Studio Ghibli",
+                poster: "pingu novas amizades.jpg"
+            },
+            {
+                id: 221,
+                title: "Pingu - Brincando na Neve",
+                category: "Infantil",
+                type: "Filme",
+                year: 2004,
+                director: "Otmar Gutmann",
+                cast: "Carlo Bonomi",
+                synopsis: "Pingu se diverte na neve enquanto descobre importantes lições.",
+                location: "Gaveta Studio Ghibli",
+                poster: "pingu brincando na neve.jpg"
+
+            },
+            {
+                id: 222,
+                title: "Wolverine: Imortal",
+                category: "Marvel",
+                type: "Filme",
+                year: 2013,
+                director: "James Mangold",
+                cast: "Hugh Jackman, Tao Okamoto",
+                synopsis: "Wolverine enfrenta um poderoso inimigo no Japão enquanto lida com seu passado.",
+                location: "Gaveta Studio Ghibli",
+                poster: "wolverine imortal.jpg"
+            },
+            {
+                id: 137,
+                title: "X-Men 2",
+                category: "Marvel",
+                type: "Filme",
+                year: 2003,
+                director: "Bryan Singer",
+                cast: "Patrick Stewart, Hugh Jackman",
+                synopsis: "Os X-Men se unem ao seu inimigo Magneto para impedir um coronel que planeja exterminar todos os mutantes.",
+                location: "Prateleira Marvel",
+                poster: "xmen 2.jpg"
+            },
+            {
+                id: 138,
+                title: "Homem-Aranha 1 (Sam Raimi)",
+                category: "Marvel",
+                type: "Filme",
+                year: 2002,
+                director: "Sam Raimi",
+                cast: "Tobey Maguire, Kirsten Dunst",
+                synopsis: "Peter Parker ganha poderes de aranha e deve enfrentar o Duende Verde.",
+                location: "Prateleira Marvel",
+                poster: "spider man 1.jpg"
+            },
+            {
+                id: 139,
+                title: "Homem-Aranha 2 (Sam Raimi)",
+                category: "Marvel",
+                type: "Filme",
+                year: 2004,
+                director: "Sam Raimi",
+                cast: "Tobey Maguire, Kirsten Dunst",
+                synopsis: "Peter Parker luta para equilibrar sua vida pessoal com seus deveres como Homem-Aranha enquanto enfrenta o Doutor Octopus.",
+                location: "Prateleira Marvel",
+                poster: "spider man 2.jpg"
+            },
+            {
+                id: 140,
+                title: "Homem-Aranha 3 (Sam Raimi)",
+                category: "Marvel",
+                type: "Filme",
+                year: 2007,
+                director: "Sam Raimi",
+                cast: "Tobey Maguire, Kirsten Dunst",
+                synopsis: "O Homem-Aranha enfrenta novos vilões e um simbionte alienígena que altera sua personalidade.",
+                location: "Prateleira Marvel",
+                poster: "spider man 3.jpg"
+            },
+            {
+                id: 9,
+                title: "Vingadores: Ultimato",
+                category: "Marvel",
+                type: "Filme",
+                year: 2019,
+                director: "Anthony e Joe Russo",
+                cast: "Robert Downey Jr., Chris Evans",
+                synopsis: "Os Vingadores restantes se reúnem para reverter as ações de Thanos.",
+                location: "Prateleira Marvel",
+                poster: "ultimato vinga.jpg",
+                heroImage: "ultimato vinga.jpg",
+                heroImageMobile: "ultimato vinga_mobile.jpg",
+                featured: true
+            },
+            {
+                id: 141,
+                title: "Watchmen – O Filme",
+                category: "DC",
+                type: "Filme",
+                year: 2009,
+                director: "Zack Snyder",
+                cast: "Jackie Earle Haley, Patrick Wilson",
+                synopsis: "Em uma realidade alternativa, super-heróis aposentados investigam o assassinato de um de seus próprios.",
+                location: "Prateleira DC",
+                poster: "watchmen filme.jpg"
+            },
+            {
+                id: 142,
+                title: "O homem de Aco",
+                category: "DC",
+                type: "Filme",
+                year: 2013,
+                director: "Zack Snyder",
+                cast: "Henry Cavill, Amy Adams",
+                synopsis: "Clark Kent descobre suas origens alienígenas e deve proteger a Terra de uma invasão de sua própria raça.",
+                location: "Prateleira DC",
+                poster: "man of steel.jpg"
+            },
+            {
+                id: 143,
+                title: "Superman Returns",
+                category: "DC",
+                type: "Filme",
+                year: 2006,
+                director: "Bryan Singer",
+                cast: "Brandon Routh, Kate Bosworth",
+                synopsis: "Superman retorna à Terra após uma longa ausência e deve enfrentar Lex Luthor.",
+                location: "Prateleira DC",
+                poster: "superman returns.jpg"
+            },
+            {
+                id: 144,
+                title: "Superman Vs Batman",
+                category: "DC",
+                type: "Filme",
+                year: 2016,
+                director: "Zack Snyder",
+                cast: "Ben Affleck, Henry Cavill",
+                synopsis: "Batman e Superman se enfrentam enquanto uma nova ameaça surge para colocar a humanidade em perigo.",
+                location: "Prateleira DC",
+                poster: "batman v superman.jpg"
+            },
+            {
+                id: 10,
+                title: "Batman: O Cavaleiro das Trevas",
+                category: "DC",
+                type: "Filme",
+                year: 2008,
+                director: "Christopher Nolan",
+                cast: "Christian Bale, Heath Ledger",
+                synopsis: "Batman enfrenta o Coringa, um criminoso que busca mergulhar Gotham no caos.",
+                location: "Prateleira DC",
+                poster: "cavaleiro das trevas.jpg",
+                heroImage: "cavaleiro das trevas.jpg",
+                heroImageMobile: "cavaleiro das trevas.jpg",
+                featured: true
+            },
+            {
+                id: 158,
+                title: "Batman Begins",
+                category: "DC",
+                type: "Filme",
+                year: 2005,
+                director: "Christopher Nolan",
+                cast: "Christian Bale, Michael Caine",
+                synopsis: "Bruce Wayne inicia sua jornada para se tornar o protetor de Gotham.",
+                location: "Gaveta Studio Ghibli",
+                poster: "batman begins.jpg"
+            },
+            {
+                id: 147,
+                title: "V de Vingança",
+                category: "DC",
+                type: "Filme",
+                year: 2005,
+                director: "James McTeigue",
+                cast: "Natalie Portman, Hugo Weaving",
+                synopsis: "Um vigilante mascarado inspira uma revolução contra um regime totalitário.",
+                location: "Gaveta Studio Ghibli",
+                poster: "v de vinganca.jpg"
+            },
+             {
+                id: 170,
+                title: "Superman/Batman: Inimigos Públicos",
+                category: "DC",
+                type: "Filme",
+                year: 2009,
+                director: "Sam Liu",
+                cast: "Kevin Conroy, Tim Daly",
+                synopsis: "Superman e Batman unem forças quando se tornam alvos do governo.",
+                location: "Gaveta Studio Ghibli",
+                poster: "superman batman inimigos publicos.jpg"
+            }
+        ];
+
+        const categories = [
+            "Terror Psicológico", "Slasher", "Sci-Fi", "Comédia", "Romance", "Ação", 
+            "Aventura", "Life-Change Movies", "Animações", "Marvel", "DC", "Infantil"
+        ];
+
+        const collections = [
+            {
+                id: 'indiana-jones',
+                title: 'Coleção Indiana Jones',
+                poster: 'capa indiana jones horizontal.jpg',
+                heroImage: 'capa indiana jones horizontal.jpg',
+                movieIds: [6, 125, 126, 127]
+            },
+            {
+                id: '007',
+                title: 'Coleção 007',
+                poster: '007 coleçoes.jpg',
+                heroImage: '007 coleçoes.jpg',
+                movieIds: [114, 115, 190]
+            },
+            {
+                id: 'star-wars',
+                title: 'Coleção Star Wars',
+                poster: 'star wars banner coleçao.jpg',
+                heroImage: 'star wars banner coleçao.jpg',
+                movieIds: [123, 148]
+            },
+            {
+                id: 'batman',
+                title: 'Coleção Batman',
+                poster: 'batman coleçoes.jpg',
+                heroImage: 'batman coleçoes.jpg',
+                movieIds: [10, 158, 160, 170]
+            },
+            {
+                id: 'kubrick',
+                title: 'Coleção Kubrick',
+                poster: 'stanley kubrick coleçoes.jpg',
+                heroImage: 'stanley kubrick coleçoes.jpg',
+                movieIds: [1, 135, 136, 171]
+            },
+            {
+                id: 'spider-man',
+                title: 'Coleção Homem Aranha',
+                poster: 'homem aranha coleçao.jpg',
+                heroImage: 'homem aranha coleçao.jpg',
+                movieIds: [138, 139, 140]
+            }
+        ];
+
+        let currentFilter = null;
+        let currentSlideIndex = 0;
+        let carouselInterval;
+        const heroMovies = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupCategoryDropdown();
+            setupHeroCarousel();
+            setupSearch();
+            setupScroll();
+            renderCatalog();
+        });
+
+        function setupCategoryDropdown() {
+            const dropdown = document.getElementById('categoryDropdown');
+            if (!dropdown) return;
+            
+            dropdown.innerHTML = ''; // Limpa antes de preencher
+            categories.forEach(category => {
+                const link = document.createElement('a');
+                link.href = '#';
+                link.textContent = category;
+                link.onclick = (e) => {
+                    e.preventDefault();
+                    filterByCategory(category);
+                    dropdown.classList.remove('active');
+                };
+                dropdown.appendChild(link);
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.category-dropdown')) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        }
+
+        function toggleCategories(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('categoryDropdown').classList.toggle('active');
+        }
+
+        function filterByCategory(category) {
+            currentFilter = category;
+            // Verifica se a categoria está na string ou dentro do array de categorias do filme
+            const filtered = movies.filter(m => 
+                Array.isArray(m.category) ? m.category.includes(category) : m.category === category
+            );
+            
+            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'block';
+            document.getElementById('searchResultsTitle').textContent = category;
+            document.getElementById('searchGrid').style.display = 'none';
+            document.getElementById('catalog').style.display = 'block';
+            
+            renderCatalog(filtered);
+        }/* ================================ */
+        /* JS DO NOVO CARROSSEL DISNEY+     */
+        /* ================================ */
+        function setupHeroCarousel() {
+            const carouselIds = [6, 114, 123, 10, 1, 138]; 
+            
+            carouselIds.forEach(id => {
+                const movie = movies.find(m => m.id === id);
+                if (movie) {
+                    if (!movie.heroImage) {
+                        movie.heroImage = `https://picsum.photos/seed/hero_${movie.id}/1200/600`;
+                    }
+                    if (!movie.heroImageMobile) {
+                        movie.heroImageMobile = movie.heroImage;
+                    }
+                    heroMovies.push(movie);
+                }
+            });
+
+            const carouselEl = document.getElementById('heroCarousel');
+            const dotsEl = document.getElementById('carouselDots');
+            carouselEl.innerHTML = '';
+            dotsEl.innerHTML = '';
+
+            heroMovies.forEach((movie, index) => {
+                const slide = document.createElement('div');
+                slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
+                
+                slide.style.setProperty('--bg-desktop', `url("${movie.heroImage}")`);
+                slide.style.setProperty('--bg-mobile', `url("${movie.heroImageMobile}")`);
+                
+                slide.innerHTML = `
+                    <div class="hero-content">
+                        <h1 class="hero-title">${movie.title}</h1>
+                        <p class="hero-desc">${movie.synopsis}</p>
+                        <button class="btn btn-primary" onclick='openModalById(${movie.id})'>Mais Informações</button>
+                    </div>
+                `;
+                
+                // Se o usuário clicar no filme do lado, o carrossel vai até ele
+                slide.onclick = (e) => {
+                    if (index !== currentSlideIndex) {
+                        e.preventDefault(); 
+                        goToSlide(index);
+                    }
+                };
+
+                carouselEl.appendChild(slide);
+
+                const dot = document.createElement('div');
+                dot.className = `dot ${index === 0 ? 'active' : ''}`;
+                dot.onclick = () => goToSlide(index);
+                dotsEl.appendChild(dot);
+            });
+
+            window.addEventListener('resize', updateCarouselPosition);
+            setTimeout(updateCarouselPosition, 100);
+            startCarousel();
+        }
+
+        // Função do botão "Mais informações"
+        function openModalById(id) {
+            const movie = movies.find(m => m.id === id);
+            if (movie) openModal(movie);
+        }
+
+        // A Matemática que centraliza o card e mostra as pontas
+        function updateCarouselPosition() {
+            const track = document.getElementById('heroCarousel');
+            const slides = document.querySelectorAll('.hero-slide');
+            if (slides.length === 0) return;
+
+            const activeSlide = slides[currentSlideIndex];
+            const wrapper = document.getElementById('heroCarouselWrapper');
+
+            const offsetLeft = activeSlide.offsetLeft;
+            const centerOffset = (wrapper.clientWidth - activeSlide.offsetWidth) / 2;
+            const finalPosition = offsetLeft - centerOffset;
+
+            track.style.transform = `translateX(-${finalPosition}px)`;
+        }
+
+        function updateDotsAndSlides() {
+            const dots = document.querySelectorAll('.dot');
+            const slides = document.querySelectorAll('.hero-slide');
+
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlideIndex);
+            });
+
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlideIndex);
+            });
+        }
+
+        function goToSlide(index) {
+            if (index === currentSlideIndex) return;
+            currentSlideIndex = index;
+            updateDotsAndSlides();
+            updateCarouselPosition();
+            startCarousel(); // Reseta o timer de 8s
+        }
+
+        function nextSlide() {
+            const slides = document.querySelectorAll('.hero-slide');
+            if (slides.length <= 1) return;
+            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+            goToSlide(currentSlideIndex);
+        }
+
+        function startCarousel() {
+            if (carouselInterval) clearInterval(carouselInterval);
+            carouselInterval = setInterval(nextSlide, 8000); // 8s
+        }
+
+        function renderCatalog(filteredMovies = movies) {
+            const catalogEl = document.getElementById('catalog');
+            if (!catalogEl) return;
+            catalogEl.innerHTML = '';
+            
+            // Only show Destaques and Collections on the main view (no filter active)
+            if (!currentFilter && filteredMovies === movies) {
+                // 1. Destaques
+                const featuredMovies = movies.filter(m => m.featured);
+                if (featuredMovies.length > 0) {
+                    const row = document.createElement('div');
+                    row.className = 'row';
+                    row.innerHTML = `<h2 class="row-title">Destaques</h2>`;
+                    
+                    const postersContainer = document.createElement('div');
+                    postersContainer.className = 'row-posters';
+                    
+                    featuredMovies.forEach(movie => {
+                        const img = document.createElement('img');
+                        img.className = 'poster';
+                        img.src = movie.poster;
+                        img.alt = movie.title;
+                        img.onclick = () => openModal(movie);
+                        postersContainer.appendChild(img);
+                    });
+                    
+                    row.appendChild(postersContainer);
+                    catalogEl.appendChild(row);
+                }
+
+                // 2. Coleções
+                const collRow = document.createElement('div');
+                collRow.className = 'row';
+                // User said: "Essas coleçoes nao serao categorias em si, ou seja, nao terao um titulo como: Coleçoes"
+                
+                const collContainer = document.createElement('div');
+                collContainer.className = 'row-posters';
+                
+                collections.forEach(coll => {
+                    const img = document.createElement('img');
+                    img.className = 'collection-poster';
+                    img.src = coll.poster;
+                    img.alt = coll.title;
+                    img.onclick = () => openCollectionView(coll);
+                    collContainer.appendChild(img);
+                });
+                
+                collRow.appendChild(collContainer);
+                catalogEl.appendChild(collRow);
+            }
+
+            // 3. Categorias
+            categories.forEach(category => {
+                const isCategoryFilter = currentFilter && categories.includes(currentFilter);
+                if (isCategoryFilter && category !== currentFilter) {
+                    return;
+                }
+
+                const categoryMovies = filteredMovies.filter(m => 
+                    Array.isArray(m.category) ? m.category.includes(category) : m.category === category
+                );
+
+                if (categoryMovies.length === 0) return;
+                
+                const row = document.createElement('div');
+                row.className = 'row';
+                
+                if (!isCategoryFilter) {
+                    row.innerHTML = `<h2 class="row-title">${category}</h2>`;
+                }
+
+                // CORREÇÃO AQUI: Criando um novo container para a categoria atual
+                const categoryPostersContainer = document.createElement('div');
+                categoryPostersContainer.className = 'row-posters';
+
+                categoryMovies.forEach(movie => {
+                    const img = document.createElement('img');
+                    img.className = 'poster';
+                    img.src = movie.poster;
+                    img.alt = movie.title;
+                    img.loading = 'lazy';
+                    img.referrerPolicy = 'no-referrer';
+                    img.onclick = () => openModal(movie);
+                    categoryPostersContainer.appendChild(img);
+                });
+                
+                row.appendChild(categoryPostersContainer);
+                catalogEl.appendChild(row);
+            });
+        }
+
+
+        function toggleSearch() {
+            const container = document.getElementById('searchContainer');
+            const input = document.getElementById('searchInput');
+            container.classList.toggle('expanded');
+            if (container.classList.contains('expanded')) {
+                input.focus();
+            }
+        }
+
+        function filterByType(type) {
+            currentFilter = type;
+            const filtered = movies.filter(m => m.type === type);
+            
+            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'block';
+            document.getElementById('searchResultsTitle').textContent = type === 'Filme' ? 'Filmes' : 'Séries';
+            document.getElementById('searchGrid').style.display = 'none';
+            document.getElementById('catalog').style.display = 'block';
+            
+            renderCatalog(filtered);
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const catalogEl = document.getElementById('catalog');
+            const heroEl = document.querySelector('.hero-carousel');
+            const searchResultsTitle = document.getElementById('searchResultsTitle');
+            const searchGrid = document.getElementById('searchGrid');
+            
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                if (query.length > 0) {
+                    heroEl.style.display = 'none';
+                    document.getElementById('carouselDots').style.display = 'none';
+                    catalogEl.style.display = 'none';
+                    searchResultsTitle.style.display = 'block';
+                    searchGrid.style.display = 'grid';
+                    
+                    const results = movies.filter(m => m.title.toLowerCase().includes(query));
+                    
+                    searchGrid.innerHTML = '';
+                    if (results.length > 0) {
+                        searchResultsTitle.textContent = `Resultados para "${query}"`;
+                        results.forEach(movie => {
+                            const img = document.createElement('img');
+                            img.className = 'poster';
+                            img.src = movie.poster;
+                            img.alt = movie.title;
+                            img.referrerPolicy = 'no-referrer';
+                            img.onclick = () => openModal(movie);
+                            searchGrid.appendChild(img);
+                        });
+                    } else {
+                        searchResultsTitle.textContent = `Nenhum resultado encontrado para "${query}"`;
+                    }
+                } else {
+                    // CORREÇÃO: Verificando que tipo de filtro estava ativo antes da busca
+                    if (currentFilter) {
+                       if (categories.includes(currentFilter)) {
+                           filterByCategory(currentFilter);
+                       } else {
+                        filterByType(currentFilter);
+                       }
+                    } else {
+                        resetSearch();
+                    }
+                }
+            });
+        }
+
+        function resetSearch() {
+            currentFilter = null;
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            document.getElementById('searchContainer').classList.remove('expanded');
+            
+            document.querySelector('.hero-carousel').style.display = 'block';
+            document.getElementById('carouselDots').style.display = 'flex';
+            document.getElementById('catalog').style.display = 'block';
+            document.getElementById('searchResultsTitle').style.display = 'none';
+            document.getElementById('searchGrid').style.display = 'none';
+            
+            renderCatalog(movies);
+        }
+
+        function openModal(movie) {
+            const modal = document.getElementById('modal');
+            const poster = document.getElementById('modalPoster');
+            poster.src = movie.poster;
+            poster.referrerPolicy = 'no-referrer';
+            
+            document.getElementById('modalTitle').textContent = movie.title;
+            document.getElementById('modalYear').textContent = movie.year;
+            
+            const catDisplay = Array.isArray(movie.category) ? movie.category.join(', ') : movie.category;
+            document.getElementById('modalCategory').textContent = catDisplay;
+            
+            document.getElementById('modalDesc').textContent = movie.synopsis;
+            document.getElementById('modalDirector').textContent = movie.director;
+            document.getElementById('modalCast').textContent = movie.cast;
+            document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+
+        function openCollectionView(collection) {
+            const view = document.getElementById('collectionView');
+            const hero = document.getElementById('collectionHero');
+            const title = document.getElementById('collectionTitle');
+            const grid = document.getElementById('collectionGrid');
+            const backBtn = document.getElementById('backToMain');
+
+            // Hide main content
+            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'none';
+            document.getElementById('searchGrid').style.display = 'none';
+
+            // Setup Collection View
+            hero.style.backgroundImage = `url("${collection.heroImage}")`;
+            title.textContent = collection.title;
+            
+            grid.innerHTML = '';
+            collection.movieIds.forEach(id => {
+                const movie = movies.find(m => m.id === id);
+                if (movie) {
+                    const img = document.createElement('img');
+                    img.className = 'poster';
+                    img.src = movie.poster;
+                    img.alt = movie.title;
+                    img.onclick = () => openModal(movie);
+                    grid.appendChild(img);
+                }
+            });
+
+            view.style.display = 'block';
+            backBtn.style.display = 'flex';
+            window.scrollTo(0, 0);
+        }
+
+        function closeCollectionView() {
+            document.getElementById('collectionView').style.display = 'none';
+            document.getElementById('backToMain').style.display = 'none';
+            resetSearch();
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on outside click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modal')) {
+                closeModal();
+            }
+        });
+
+        function setupScroll() {
+            window.addEventListener('scroll', () => {
+                const header = document.querySelector('header');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
