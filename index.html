@@ -721,6 +721,34 @@
             </div> 
         </div>
     </div>
+    
+    <script type="module">
+        // Importa as ferramentas direto da nuvem do Google
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // As suas chaves de acesso secretas
+        const firebaseConfig = {
+            apiKey: "AIzaSyATZMLWwEsKTFJ0P-aK7sp4X6d6LmO3v2I",
+            authDomain: "stante-catalogo.firebaseapp.com",
+            projectId: "stante-catalogo",
+            storageBucket: "stante-catalogo.firebasestorage.app",
+            messagingSenderId: "795178223311",
+            appId: "1:795178223311:web:c6a2d3d058bb49c43d59ba",
+            measurementId: "G-TK0NQ7GM7D"
+        };
+
+        // Ligando os motores
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Deixa o banco de dados "global" para o seu outro script poder salvar os perfis
+        window.db = db;
+        
+        console.log("Firebase conectado com sucesso! O Cérebro está online.");
+    </script>
 
     <script>
         const movies = [
