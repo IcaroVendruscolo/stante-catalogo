@@ -199,10 +199,10 @@
         /* O Cartão Individual do Filme */
         .hero-slide {
             position: relative;
-            flex: 0 0 85%; /* Cada cartão ocupa 85% da tela, revelando as pontas dos outros */
+            flex: 0 0 92%; /* Cada cartão ocupa 85% da tela, revelando as pontas dos outros */
             flex-shrink: 0;
-            max-width: 1200px;
-            aspect-ratio: 21 / 9; /* Proporção retangular de cinema para Desktop */
+            max-width: 1600px;
+            aspect-ratio: 16 / 7; /* Proporção retangular de cinema para Desktop */
             background-size: cover;
             background-position: center;
             display: flex;
@@ -2320,7 +2320,7 @@
                 Array.isArray(m.category) ? m.category.includes(category) : m.category === category
             );
             
-            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
             document.getElementById('searchResultsTitle').textContent = category;
@@ -2440,7 +2440,7 @@
 
         function startCarousel() {
             if (carouselInterval) clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 8000); // 8s
+            carouselInterval = setInterval(nextSlide, 5000); // 5s
         }
 
         function renderCatalog(filteredMovies = movies) {
@@ -2548,7 +2548,7 @@
             currentFilter = type;
             const filtered = movies.filter(m => m.type === type);
             
-            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
             document.getElementById('searchResultsTitle').textContent = type === 'Filme' ? 'Filmes' : 'Séries';
@@ -2561,7 +2561,7 @@
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
             const catalogEl = document.getElementById('catalog');
-            const heroEl = document.querySelector('.hero-carousel');
+            const heroEl = document.querySelector('heroCarouselWrapper');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
             const searchGrid = document.getElementById('searchGrid');
             
@@ -2613,7 +2613,7 @@
             searchInput.value = '';
             document.getElementById('searchContainer').classList.remove('expanded');
             
-            document.querySelector('.hero-carousel').style.display = 'block';
+            document.getElementById('heroCarouselWrapper').style.display = 'block';
             document.getElementById('carouselDots').style.display = 'flex';
             document.getElementById('catalog').style.display = 'block';
             document.getElementById('searchResultsTitle').style.display = 'none';
@@ -2652,7 +2652,7 @@
             const backBtn = document.getElementById('backToMain');
 
             // Hide main content
-            document.querySelector('.hero-carousel').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('catalog').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'none';
