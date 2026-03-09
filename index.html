@@ -906,18 +906,18 @@
             }
         });
 
-         // 2. DESENHA A TELA INICIAL (Editar Perfis)
+        // 2. DESENHA A TELA INICIAL (Editar Perfis)
         function renderMainScreen() {
             const container = document.getElementById('maxProfilesContainer');
             container.innerHTML = '';
 
-            // NOVO: Esconde o site por trás para não dar rolagem!
+            // Esconde o site por trás para não dar rolagem!
             document.body.style.overflow = 'hidden'; 
             document.querySelector('nav').style.display = 'none';
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('catalog').style.display = 'none';
 
-            // RECOLOCANDO A PARTE QUE SUMIU!
+            // AQUI ESTÁ A PARTE QUE HAVIA SUMIDO: O Loop que desenha os avatares!
             allProfiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'max-profile-card';
@@ -926,7 +926,7 @@
                     <span class="max-profile-name">${profile.name}</span>
                 `;
                 
-                // NOVO: O que acontece ao clicar no perfil
+                // O que acontece ao clicar no perfil
                 card.onclick = () => {
                     window.loggedUser = profile; // Salva quem logou
                     document.getElementById('maxProfileScreen').style.display = 'none'; // Some com a tela de perfis
@@ -947,6 +947,7 @@
             // Oculta o botão + se chegar a 7 perfis
             document.querySelector('.max-add-container').style.display = (allProfiles.length >= 7) ? 'none' : 'flex';
         }
+
 
 
         // --- FUNÇÕES DE NAVEGAÇÃO DE TELAS ---
@@ -2868,7 +2869,7 @@
         function setupSearch() {
             const searchInput = document.getElementById('searchInput');
             const catalogEl = document.getElementById('catalog');
-            const heroEl = document.querySelector('heroCarouselWrapper');
+            const heroEl = document.getElementById('heroCarouselWrapper');
             const searchResultsTitle = document.getElementById('searchResultsTitle');
             const searchGrid = document.getElementById('searchGrid');
             
