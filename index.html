@@ -913,11 +913,13 @@
 
             // Esconde o site por trás para não dar rolagem!
             document.body.style.overflow = 'hidden'; 
-            document.querySelector('nav').style.display = 'none';
+            
+            // CORREÇÃO 1: Aqui era 'nav', agora é 'header'
+            document.querySelector('header').style.display = 'none';
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('catalog').style.display = 'none';
 
-            // AQUI ESTÁ A PARTE QUE HAVIA SUMIDO: O Loop que desenha os avatares!
+            // Loop que desenha os avatares
             allProfiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'max-profile-card';
@@ -933,7 +935,9 @@
                     
                     // Revela o site
                     document.body.style.overflow = 'auto'; 
-                    document.querySelector('nav').style.display = 'flex';
+                    
+                    // CORREÇÃO 2: Aqui era 'nav', agora é 'header'
+                    document.querySelector('header').style.display = 'flex';
                     document.getElementById('heroCarouselWrapper').style.display = 'block';
                     document.getElementById('catalog').style.display = 'block';
 
@@ -947,7 +951,6 @@
             // Oculta o botão + se chegar a 7 perfis
             document.querySelector('.max-add-container').style.display = (allProfiles.length >= 7) ? 'none' : 'flex';
         }
-
 
 
         // --- FUNÇÕES DE NAVEGAÇÃO DE TELAS ---
