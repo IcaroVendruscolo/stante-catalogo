@@ -641,87 +641,74 @@
             /* Aumentar os banners das coleções no mobile */
             .collection-poster {
                 width: 70%; /* Os banners ocupam 70% da largura da tela no mobile */
-                aspect-ratio: 16/9; /* Mantém a proporção de paisagem */
+                aspect-ratio: 16/9; /* Mantém a proporção de paisagem */ 
+            } /* <-- FALTAVA ESSA CHAVE */
+        } /* <-- E FALTAVA ESSA CHAVE DO MOBILE */
                 
         /* ================================ */
-        /* TELA DE PERFIS ESTILO MAX        */
+        /* TELA DE PERFIS ESTILO MAX (CORRIGIDO) */
         /* ================================ */
         .max-screen-wrapper {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #0f1014; /* Fundo idêntico ao da Max */
-            z-index: 99999; color: white;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #0f1014; z-index: 999999; color: white;
             font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow-y: auto; transition: opacity 0.5s ease;
+            overflow-y: auto; /* Permite rolar apenas dentro da tela de perfil se a tela for pequena */
         }
 
         .max-view { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
 
-        /* Header Superior */
-        .max-header {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 25px 40px; position: relative;
-        }
-        .max-header button, .max-header-left, .max-header-right {
-            background: none; border: none; color: #e6e6e6;
-            font-size: 1.1rem; cursor: pointer; text-transform: none;
-        }
-        .max-header h2 {
-            font-size: 1.2rem; font-weight: 500; margin: 0;
-            position: absolute; left: 50%; transform: translateX(-50%);
-        }
+        .max-header { display: flex; justify-content: space-between; align-items: center; padding: 25px 40px; }
+        .max-header button, .max-header-left, .max-header-right { background: none; border: none; color: #e6e6e6; font-size: 1.1rem; cursor: pointer; }
+        .max-header h2 { font-size: 1.2rem; font-weight: 500; text-align: center; flex: 1; margin: 0; }
 
-        /* Conteúdo Central */
-        .max-content { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; flex: 1; }
+        .max-content { display: flex; flex-direction: column; align-items: center; padding: 20px; flex: 1; justify-content: center;}
 
-        /* Linha de Avatares Iniciais */
-        .max-profiles-row { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
-        .max-profile-card { display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative;}
+        .max-profiles-row { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; max-width: 900px; margin: 0 auto;}
+        
+        /* A MÁGICA QUE RESOLVE O BUG DA IMAGEM GIGANTE */
+        .max-profile-card { display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 120px; }
         .max-avatar-img {
-            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            width: 100px !important; height: 100px !important; 
+            border-radius: 50% !important; object-fit: cover !important;
             border: 2px solid transparent; transition: all 0.2s;
         }
         .max-profile-card:hover .max-avatar-img { border-color: white; transform: scale(1.05); }
-        .max-profile-name { margin-top: 15px; font-size: 1rem; color: #ccc; font-weight: 500; }
+        .max-profile-name { margin-top: 10px; font-size: 1rem; color: #ccc; font-weight: 500; text-align: center;}
 
-        /* Botão + (Adicionar Perfil) */
-        .max-add-container { display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
-        .max-add-btn {
-            width: 80px; height: 80px; border-radius: 50%; background-color: #2a2a2f;
-            color: #ccc; font-size: 40px; border: none; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
-        }
+        .max-add-container { display: flex; flex-direction: column; align-items: center; margin-top: 30px; width: 100%;}
+        .max-add-btn { width: 70px !important; height: 70px !important; border-radius: 50% !important; background-color: #2a2a2f; color: #ccc; font-size: 40px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .max-add-btn:hover { background-color: #3d3d42; color: white; }
-        .max-add-label { margin-top: 15px; font-size: 1rem; color: #ccc; }
+        .max-add-label { margin-top: 10px; font-size: 1rem; color: #ccc; }
 
-        /* Tela de Criar Perfil */
-        .max-large-avatar-wrapper { position: relative; cursor: pointer; margin-bottom: 40px; }
-        .max-large-avatar { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; }
-        .max-edit-badge {
-            position: absolute; bottom: 5px; right: 5px; background: white; color: black;
-            width: 32px; height: 32px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-        }
+        .max-large-avatar-wrapper { position: relative; cursor: pointer; margin-bottom: 20px; display: flex; justify-content: center;}
+        .max-large-avatar { width: 130px !important; height: 130px !important; border-radius: 50% !important; object-fit: cover !important; }
+        .max-edit-badge { position: absolute; bottom: 0; right: calc(50% - 60px); background: white; color: black; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
 
-        /* Inputs de Formulário */
-        .max-form-container { width: 100%; max-width: 600px; }
-        .max-form-group { margin-bottom: 30px; }
-        .max-form-label { display: block; font-size: 1rem; font-weight: bold; margin-bottom: 15px; }
-        .max-input {
-            width: 100%; background: transparent; border: 1px solid #444; border-radius: 6px;
-            color: white; padding: 18px; font-size: 1.1rem; outline: none; transition: border 0.2s;
-        }
-        .max-input:focus { border-color: white; }
-        .date-inputs { display: flex; gap: 15px; }
+        .max-form-container { width: 100%; max-width: 500px; margin: 0 auto; }
+        .max-form-group { margin-bottom: 20px; }
+        .max-form-label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #aaa;}
+        .max-input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: white; padding: 15px; font-size: 1rem; box-sizing: border-box;}
+        .date-inputs { display: flex; gap: 10px; }
         .date-inputs input { text-align: center; }
 
-        /* Tela de Seleção de Avatares */
-        .max-category-title { margin-bottom: 25px; font-size: 1.1rem; width: 100%; }
-        .max-avatar-grid { display: flex; gap: 20px; flex-wrap: wrap; }
-        .max-grid-item {
-            width: 100px; height: 100px; border-radius: 50%; cursor: pointer;
-            object-fit: cover; opacity: 0.7; transition: all 0.2s;
-        }
+        .max-avatar-grid { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; max-width: 800px; margin: 0 auto;}
+        .max-grid-item { width: 80px !important; height: 80px !important; border-radius: 50% !important; cursor: pointer; object-fit: cover !important; opacity: 0.7; }
         .max-grid-item:hover { opacity: 1; transform: scale(1.1); border: 2px solid white; }
+
+        /* ================================ */
+        /* BARRA INFERIOR DE NAVEGAÇÃO      */
+        /* ================================ */
+        .bottom-nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; background-color: rgba(15, 16, 20, 0.95);
+            backdrop-filter: blur(10px); border-top: 1px solid #333; display: none; justify-content: space-around;
+            align-items: center; padding: 10px 0; z-index: 1000;
+        }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: #888; text-decoration: none; cursor: pointer; font-size: 0.8rem; gap: 5px;}
+        .bottom-nav-item:hover { color: white; }
+        .bottom-nav-icon { font-size: 1.5rem; font-weight: bold;}
+        .bottom-profile-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #888;}
+        .bottom-nav-item:hover .bottom-profile-img { border-color: white; }
+
 
             }
         }
@@ -832,6 +819,7 @@
     <div class="carousel-dots" id="carouselDots">
         </div>
 
+
         <!-- Slides will be injected by JS -->
     </section>
     <div class="carousel-dots" id="carouselDots">
@@ -918,11 +906,18 @@
             }
         });
 
-        // 2. DESENHA A TELA INICIAL (Editar Perfis)
+         // 2. DESENHA A TELA INICIAL (Editar Perfis)
         function renderMainScreen() {
             const container = document.getElementById('maxProfilesContainer');
-            container.innerHTML = ''; 
+            container.innerHTML = '';
 
+            // NOVO: Esconde o site por trás para não dar rolagem!
+            document.body.style.overflow = 'hidden'; 
+            document.querySelector('nav').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+
+            // RECOLOCANDO A PARTE QUE SUMIU!
             allProfiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'max-profile-card';
@@ -930,10 +925,21 @@
                     <img src="${profile.avatar}" class="max-avatar-img">
                     <span class="max-profile-name">${profile.name}</span>
                 `;
+                
+                // NOVO: O que acontece ao clicar no perfil
                 card.onclick = () => {
-                    window.loggedUser = profile;
-                    document.getElementById('maxProfileScreen').style.opacity = '0';
-                    setTimeout(() => { document.getElementById('maxProfileScreen').style.display = 'none'; }, 500);
+                    window.loggedUser = profile; // Salva quem logou
+                    document.getElementById('maxProfileScreen').style.display = 'none'; // Some com a tela de perfis
+                    
+                    // Revela o site
+                    document.body.style.overflow = 'auto'; 
+                    document.querySelector('nav').style.display = 'flex';
+                    document.getElementById('heroCarouselWrapper').style.display = 'block';
+                    document.getElementById('catalog').style.display = 'block';
+
+                    // Atualiza a Barra Inferior com a foto do usuário
+                    document.getElementById('bottomNavBar').style.display = 'flex';
+                    document.getElementById('bottomProfileImg').src = profile.avatar;
                 };
                 container.appendChild(card);
             });
@@ -941,6 +947,7 @@
             // Oculta o botão + se chegar a 7 perfis
             document.querySelector('.max-add-container').style.display = (allProfiles.length >= 7) ? 'none' : 'flex';
         }
+
 
         // --- FUNÇÕES DE NAVEGAÇÃO DE TELAS ---
         window.openCreateView = function() {
@@ -3009,5 +3016,18 @@
             });
         }
     </script>
+    
+    <div id="bottomNavBar" class="bottom-nav-bar">
+        <div class="bottom-nav-item" onclick="openMyListScreen()">
+            <span class="bottom-nav-icon">+</span>
+            <span>Minha Lista</span>
+        </div>
+        
+        <div class="bottom-nav-item" onclick="openProfileSettings()">
+            <img src="" id="bottomProfileImg" class="bottom-profile-img">
+            <span>Perfil</span>
+        </div>
+    </div>
+
 </body>
 </html>
