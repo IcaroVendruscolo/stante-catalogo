@@ -642,11 +642,160 @@
             .collection-poster {
                 width: 70%; /* Os banners ocupam 70% da largura da tela no mobile */
                 aspect-ratio: 16/9; /* Mantém a proporção de paisagem */
+                
+        /* ================================ */
+        /* TELA DE PERFIS ESTILO MAX        */
+        /* ================================ */
+        .max-screen-wrapper {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #0f1014; /* Fundo idêntico ao da Max */
+            z-index: 99999; color: white;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            overflow-y: auto; transition: opacity 0.5s ease;
+        }
+
+        .max-view { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* Header Superior */
+        .max-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 25px 40px; position: relative;
+        }
+        .max-header button, .max-header-left, .max-header-right {
+            background: none; border: none; color: #e6e6e6;
+            font-size: 1.1rem; cursor: pointer; text-transform: none;
+        }
+        .max-header h2 {
+            font-size: 1.2rem; font-weight: 500; margin: 0;
+            position: absolute; left: 50%; transform: translateX(-50%);
+        }
+
+        /* Conteúdo Central */
+        .max-content { display: flex; flex-direction: column; align-items: center; padding: 40px 20px; flex: 1; }
+
+        /* Linha de Avatares Iniciais */
+        .max-profiles-row { display: flex; gap: 30px; justify-content: center; flex-wrap: wrap; }
+        .max-profile-card { display: flex; flex-direction: column; align-items: center; cursor: pointer; position: relative;}
+        .max-avatar-img {
+            width: 110px; height: 110px; border-radius: 50%; object-fit: cover;
+            border: 2px solid transparent; transition: all 0.2s;
+        }
+        .max-profile-card:hover .max-avatar-img { border-color: white; transform: scale(1.05); }
+        .max-profile-name { margin-top: 15px; font-size: 1rem; color: #ccc; font-weight: 500; }
+
+        /* Botão + (Adicionar Perfil) */
+        .max-add-container { display: flex; flex-direction: column; align-items: center; margin-top: 50px; }
+        .max-add-btn {
+            width: 80px; height: 80px; border-radius: 50%; background-color: #2a2a2f;
+            color: #ccc; font-size: 40px; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.2s;
+        }
+        .max-add-btn:hover { background-color: #3d3d42; color: white; }
+        .max-add-label { margin-top: 15px; font-size: 1rem; color: #ccc; }
+
+        /* Tela de Criar Perfil */
+        .max-large-avatar-wrapper { position: relative; cursor: pointer; margin-bottom: 40px; }
+        .max-large-avatar { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; }
+        .max-edit-badge {
+            position: absolute; bottom: 5px; right: 5px; background: white; color: black;
+            width: 32px; height: 32px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Inputs de Formulário */
+        .max-form-container { width: 100%; max-width: 600px; }
+        .max-form-group { margin-bottom: 30px; }
+        .max-form-label { display: block; font-size: 1rem; font-weight: bold; margin-bottom: 15px; }
+        .max-input {
+            width: 100%; background: transparent; border: 1px solid #444; border-radius: 6px;
+            color: white; padding: 18px; font-size: 1.1rem; outline: none; transition: border 0.2s;
+        }
+        .max-input:focus { border-color: white; }
+        .date-inputs { display: flex; gap: 15px; }
+        .date-inputs input { text-align: center; }
+
+        /* Tela de Seleção de Avatares */
+        .max-category-title { margin-bottom: 25px; font-size: 1.1rem; width: 100%; }
+        .max-avatar-grid { display: flex; gap: 20px; flex-wrap: wrap; }
+        .max-grid-item {
+            width: 100px; height: 100px; border-radius: 50%; cursor: pointer;
+            object-fit: cover; opacity: 0.7; transition: all 0.2s;
+        }
+        .max-grid-item:hover { opacity: 1; transform: scale(1.1); border: 2px solid white; }
+
             }
         }
     </style>
 </head>
 <body>
+  
+      <div id="maxProfileScreen" class="max-screen-wrapper">
+        
+        <div id="viewSelectProfiles" class="max-view">
+            <div class="max-header">
+                <span class="max-header-left" style="font-weight: bold; letter-spacing: 1px;">EDITAR PERFIS</span>
+                <button class="max-header-right" onclick="enterEditMode()">Pronto</button>
+            </div>
+            
+            <div class="max-content">
+                <div class="max-profiles-row" id="maxProfilesContainer">
+                    <div class="loader" style="color: white;">Conectando...</div>
+                    </div>
+                
+                <div class="max-add-container">
+                    <button class="max-add-btn" onclick="openCreateView()">+</button>
+                    <span class="max-add-label">Adicionar perfil</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewCreateProfile" class="max-view" style="display: none;">
+            <div class="max-header">
+                <button class="max-header-left" onclick="backToSelect()">Cancele</button>
+                <h2>Criar perfil</h2>
+                <button class="max-header-right" onclick="saveNewProfile()" style="font-weight: bold;">Salvar</button>
+            </div>
+
+            <div class="max-content">
+                <div class="max-large-avatar-wrapper" onclick="openAvatarSelection()">
+                    <img src="" id="creationAvatarImg" class="max-large-avatar">
+                    <div class="max-edit-badge">✎</div>
+                </div>
+
+                <div class="max-form-container">
+                    <div class="max-form-group">
+                        <label class="max-form-label">Nome do perfil</label>
+                        <input type="text" id="maxInputName" class="max-input" maxlength="15">
+                        <p id="nameError" style="color: #ff4d4d; font-size: 0.9rem; margin-top: 5px; display: none;">Esse nome já existe!</p>
+                    </div>
+
+                    <div class="max-form-group">
+                        <label class="max-form-label">Data de nascimento</label>
+                        <div class="date-inputs">
+                            <input type="text" id="inputDay" class="max-input" placeholder="DD" maxlength="2">
+                            <input type="text" id="inputMonth" class="max-input" placeholder="MM" maxlength="2">
+                            <input type="text" id="inputYear" class="max-input" placeholder="AAAA" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="viewChooseAvatar" class="max-view" style="display: none;">
+            <div class="max-header">
+                <button class="max-header-left" onclick="closeAvatarSelection()">Cancele</button>
+                <h2>Escolha um avatar</h2>
+                <button class="max-header-right" onclick="closeAvatarSelection()">Ignorar</button>
+            </div>
+
+            <div class="max-content" style="align-items: flex-start; max-width: 1000px; margin: 0 auto;">
+                <h3 class="max-category-title">Avatares Padrão</h3>
+                <div class="max-avatar-grid" id="avatarGridContainer">
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <button id="backToMain" class="back-button" style="display: none;" onclick="closeCollectionView()">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         Voltar
@@ -723,12 +872,10 @@
     </div>
     
     <script type="module">
-        // Importa as ferramentas direto da nuvem do Google
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-        import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // As suas chaves de acesso secretas
+        // SUAS CHAVES (Já coloquei as suas aqui)
         const firebaseConfig = {
             apiKey: "AIzaSyATZMLWwEsKTFJ0P-aK7sp4X6d6LmO3v2I",
             authDomain: "stante-catalogo.firebaseapp.com",
@@ -739,15 +886,140 @@
             measurementId: "G-TK0NQ7GM7D"
         };
 
-        // Ligando os motores
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const db = getFirestore(app);
-
-        // Deixa o banco de dados "global" para o seu outro script poder salvar os perfis
-        window.db = db;
         
-        console.log("Firebase conectado com sucesso! O Cérebro está online.");
+        let allProfiles = [];
+        let currentChosenAvatar = '';
+        window.loggedUser = null; 
+
+        // Avatares parecidos com a Max (podemos mudar as URLs depois por fotos reais de séries)
+        const maxAvatars = [
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Jon&backgroundColor=1f2937",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Daenerys&backgroundColor=1f2937",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Rick&backgroundColor=1f2937",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Morty&backgroundColor=1f2937",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Sheldon&backgroundColor=1f2937",
+            "https://api.dicebear.com/7.x/avataaars/svg?seed=Joel&backgroundColor=1f2937"
+        ];
+
+        // 1. ESCUTA AO VIVO DO FIREBASE
+        onSnapshot(collection(db, "profiles"), (snapshot) => {
+            allProfiles = [];
+            snapshot.forEach(doc => { allProfiles.push({ id: doc.id, ...doc.data() }); });
+
+            if (allProfiles.length === 0) {
+                // Cria o Standard se estiver vazio
+                addDoc(collection(db, "profiles"), {
+                    name: "Standard", dob: "01/01/2000", avatar: maxAvatars[0]
+                });
+            } else {
+                renderMainScreen();
+            }
+        });
+
+        // 2. DESENHA A TELA INICIAL (Editar Perfis)
+        function renderMainScreen() {
+            const container = document.getElementById('maxProfilesContainer');
+            container.innerHTML = ''; 
+
+            allProfiles.forEach(profile => {
+                const card = document.createElement('div');
+                card.className = 'max-profile-card';
+                card.innerHTML = `
+                    <img src="${profile.avatar}" class="max-avatar-img">
+                    <span class="max-profile-name">${profile.name}</span>
+                `;
+                card.onclick = () => {
+                    window.loggedUser = profile;
+                    document.getElementById('maxProfileScreen').style.opacity = '0';
+                    setTimeout(() => { document.getElementById('maxProfileScreen').style.display = 'none'; }, 500);
+                };
+                container.appendChild(card);
+            });
+
+            // Oculta o botão + se chegar a 7 perfis
+            document.querySelector('.max-add-container').style.display = (allProfiles.length >= 7) ? 'none' : 'flex';
+        }
+
+        // --- FUNÇÕES DE NAVEGAÇÃO DE TELAS ---
+        window.openCreateView = function() {
+            document.getElementById('viewSelectProfiles').style.display = 'none';
+            document.getElementById('viewCreateProfile').style.display = 'flex';
+            
+            // Reseta form
+            document.getElementById('maxInputName').value = '';
+            document.getElementById('inputDay').value = '';
+            document.getElementById('inputMonth').value = '';
+            document.getElementById('inputYear').value = '';
+            document.getElementById('nameError').style.display = 'none';
+            
+            currentChosenAvatar = maxAvatars[Math.floor(Math.random() * maxAvatars.length)]; // Pega um aleatório
+            document.getElementById('creationAvatarImg').src = currentChosenAvatar;
+        };
+
+        window.backToSelect = function() {
+            document.getElementById('viewCreateProfile').style.display = 'none';
+            document.getElementById('viewSelectProfiles').style.display = 'flex';
+        };
+
+        window.openAvatarSelection = function() {
+            document.getElementById('viewCreateProfile').style.display = 'none';
+            document.getElementById('viewChooseAvatar').style.display = 'flex';
+            
+            const grid = document.getElementById('avatarGridContainer');
+            grid.innerHTML = '';
+            maxAvatars.forEach(url => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'max-grid-item';
+                img.onclick = () => {
+                    currentChosenAvatar = url;
+                    document.getElementById('creationAvatarImg').src = url;
+                    closeAvatarSelection();
+                };
+                grid.appendChild(img);
+            });
+        };
+
+        window.closeAvatarSelection = function() {
+            document.getElementById('viewChooseAvatar').style.display = 'none';
+            document.getElementById('viewCreateProfile').style.display = 'flex';
+        };
+
+        // --- SALVAR NO FIREBASE ---
+        window.saveNewProfile = async function() {
+            const name = document.getElementById('maxInputName').value.trim();
+            const day = document.getElementById('inputDay').value;
+            const month = document.getElementById('inputMonth').value;
+            const year = document.getElementById('inputYear').value;
+
+            if (name === '') return;
+
+            const nameExists = allProfiles.some(p => p.name.toLowerCase() === name.toLowerCase());
+            if (nameExists) {
+                document.getElementById('nameError').style.display = 'block';
+                return; 
+            }
+
+            const formattedDob = `${day}/${month}/${year}`;
+
+            try {
+                await addDoc(collection(db, "profiles"), {
+                    name: name,
+                    dob: formattedDob,
+                    avatar: currentChosenAvatar
+                });
+                backToSelect(); 
+            } catch (e) {
+                console.error("Erro:", e);
+            }
+        };
+
+        // Botão visual "Pronto" (apenas estético por enquanto)
+        window.enterEditMode = function() {
+            console.log("Modo de edição ativado");
+        };
     </script>
 
     <script>
