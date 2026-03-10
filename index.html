@@ -709,6 +709,42 @@
         .bottom-profile-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #888;}
         .bottom-nav-item:hover .bottom-profile-img { border-color: white; }
 
+        /* ================================ */
+        /* ESTILOS: MINHA LISTA E REVIEWS   */
+        /* ================================ */
+        .modal-actions-row { display: flex; gap: 20px; align-items: center; margin-top: 15px; margin-bottom: 30px; }
+        .my-list-add-btn { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #ccc; transition: color 0.2s; }
+        .my-list-add-btn:hover { color: white; }
+        .my-list-icon { font-size: 1.5rem; font-weight: bold; border: 2px solid currentColor; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
+        .my-list-text { font-size: 0.8rem; }
+
+        .reviews-section { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .review-input-box { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 20px; }
+        .review-input-box textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; resize: none; height: 80px; font-family: inherit; }
+        .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; margin-bottom: 10px; width: 100%; justify-content: flex-end; }
+        .star-rating span { font-size: 1.5rem; color: #444; cursor: pointer; transition: color 0.2s; }
+        .star-rating span:hover, .star-rating span:hover ~ span, .star-rating span.active { color: #f5c518; } /* Amarelo estilo IMDb/Letterboxd */
+
+        .reviews-list { display: flex; flex-direction: column; gap: 15px; max-height: 300px; overflow-y: auto; }
+        .review-item { border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+        .review-avatar { width: 30px; height: 30px; border-radius: 50%; }
+        .review-author { font-weight: bold; color: #ddd; font-size: 0.9rem; }
+        .review-stars { color: #f5c518; font-size: 0.9rem; }
+        .review-text { font-size: 0.9rem; color: #aaa; line-height: 1.4; }
+
+        /* Menu de Perfil Disney+ */
+        .profile-menu-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: flex-end; }
+        .profile-menu-content { background: #1a1a1a; width: 100%; max-width: 400px; border-radius: 20px 20px 0 0; padding: 30px 20px; display: flex; flex-direction: column; box-shadow: 0 -10px 30px rgba(0,0,0,0.5); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .other-profiles-list { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+        .menu-profile-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; min-width: 60px; }
+        .menu-profile-item img { width: 50px; height: 50px; border-radius: 50%; opacity: 0.6; transition: opacity 0.2s; }
+        .menu-profile-item:hover img { opacity: 1; border: 2px solid white; }
+        .menu-profile-item span { font-size: 0.8rem; color: #aaa; margin-top: 5px; }
+        .profile-menu-btn { background: transparent; border: none; color: white; text-align: left; padding: 15px 0; font-size: 1.1rem; cursor: pointer; border-bottom: 1px solid #2a2a2a; }
+        .profile-menu-btn:last-child { border-bottom: none; text-align: center; margin-top: 10px; }
+
 
             }
         }
@@ -854,14 +890,69 @@
                     <p><strong>Diretor:</strong> <span id="modalDirector"></span></p>
                     <p><strong>Elenco:</strong> <span id="modalCast"></span></p>
                 </div>
-                <div id="modalLocation" class="modal-location"></div>
+                
+                <div class="modal-actions-row">
+                    <div id="modalLocation" class="modal-location"></div>
+                    <div class="my-list-add-btn" onclick="window.toggleMyList()">
+                        <span id="myListIcon" class="my-list-icon">+</span>
+                        <span class="my-list-text">Minha Lista</span>
+                    </div>
+                </div>
+
+                <div class="reviews-section">
+                    <h3 style="margin-bottom: 10px; font-size: 1.1rem; color: #ccc;">Comentários</h3>
+                    <div class="review-input-box">
+                        <div class="star-rating" id="starRating">
+                            <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
+                        </div>
+                        <textarea id="reviewText" placeholder="Adicione seu comentário..." maxlength="250"></textarea>
+                        <button class="btn-primary" onclick="window.submitReview()" style="padding: 8px 15px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer;">Publicar</button>
+                    </div>
+                    <div id="reviewsList" class="reviews-list">
+                        </div>
+                </div>
             </div> 
         </div>
     </div>
+
+    <div id="myListView" class="collection-view">
+        <div class="collection-title-container" style="margin-top: 80px;">
+            <h1 class="collection-title">Minha Lista</h1>
+        </div>
+        <div id="myListGrid" class="search-grid" style="display: grid; padding: 0 4% 100px;"></div>
+        <button class="back-button" onclick="closeMyListScreen()">Voltar</button>
+    </div>
+
+    <div id="profileMenu" class="profile-menu-overlay" style="display: none;">
+        <div class="profile-menu-content">
+            <h3 style="color: #888; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase;">Trocar de Perfil</h3>
+            <div id="otherProfilesList" class="other-profiles-list"></div>
+            
+            <hr style="border-color: #333; margin: 15px 0;">
+            
+            <button class="profile-menu-btn" onclick="goToEditProfiles()">Editar Perfis</button>
+            <button class="profile-menu-btn" onclick="openMyListScreen()">Minha Lista</button>
+            <button class="profile-menu-btn" onclick="closeProfileMenu()" style="color: #888;">Fechar Menu</button>
+        </div>
+    </div>
+
+    <div id="bottomNavBar" class="bottom-nav-bar">
+        <div class="bottom-nav-item" onclick="openMyListScreen()">
+            <span class="bottom-nav-icon">+</span>
+            <span>Minha Lista</span>
+        </div>
+        <div class="bottom-nav-item" onclick="openProfileMenu()">
+            <img src="" id="bottomProfileImg" class="bottom-profile-img">
+            <span>Perfil</span>
+        </div>
+    </div>
+
+</body>
+
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // SUAS CHAVES (Já coloquei as suas aqui)
         const firebaseConfig = {
@@ -1031,6 +1122,205 @@
         window.enterEditMode = function() {
             console.log("Modo de edição ativado");
         };
+        
+        // ==========================================
+        // LÓGICA: MINHA LISTA, REVIEWS E MENU PERFIL
+        // ==========================================
+        let currentOpenMovieId = null;
+        let currentRating = 0;
+        let reviewsUnsubscribe = null; // Guarda a escuta ao vivo
+
+        // 1. ABRIR MENU DE PERFIL (Disney+ Style)
+        window.openProfileMenu = function() {
+            const list = document.getElementById('otherProfilesList');
+            list.innerHTML = '';
+            
+            allProfiles.forEach(p => {
+                if (p.id !== window.loggedUser.id) { // Não mostra você mesmo
+                    const pDiv = document.createElement('div');
+                    pDiv.className = 'menu-profile-item';
+                    pDiv.innerHTML = `<img src="${p.avatar}"><span>${p.name}</span>`;
+                    pDiv.onclick = () => {
+                        window.loggedUser = p;
+                        document.getElementById('bottomProfileImg').src = p.avatar;
+                        closeProfileMenu();
+                        window.resetSearch(); // Volta pra home pra atualizar a lista
+                    };
+                    list.appendChild(pDiv);
+                }
+            });
+            document.getElementById('profileMenu').style.display = 'flex';
+        };
+
+        window.closeProfileMenu = function() {
+            document.getElementById('profileMenu').style.display = 'none';
+        };
+
+        window.goToEditProfiles = function() {
+            closeProfileMenu();
+            // Esconde o site e chama a tela da Max
+            document.body.style.overflow = 'hidden'; 
+            document.querySelector('header').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('bottomNavBar').style.display = 'none';
+            
+            document.getElementById('maxProfileScreen').style.display = 'block';
+            renderMainScreen(); // Recarrega os avatares grandes
+        };
+
+        // 2. LÓGICA DA MINHA LISTA
+        window.toggleMyList = async function() {
+            if (!window.loggedUser) return;
+            const profileRef = doc(db, "profiles", window.loggedUser.id);
+            let myListArray = window.loggedUser.myList || [];
+            
+            if (myListArray.includes(currentOpenMovieId)) {
+                // Remove
+                await updateDoc(profileRef, { myList: arrayRemove(currentOpenMovieId) });
+                document.getElementById('myListIcon').textContent = '+';
+                window.loggedUser.myList = myListArray.filter(id => id !== currentOpenMovieId);
+            } else {
+                // Adiciona
+                await updateDoc(profileRef, { myList: arrayUnion(currentOpenMovieId) });
+                document.getElementById('myListIcon').textContent = '✓';
+                window.loggedUser.myList.push(currentOpenMovieId);
+            }
+        };
+
+        window.openMyListScreen = function() {
+            closeProfileMenu();
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'none';
+            document.getElementById('searchGrid').style.display = 'none';
+
+            const view = document.getElementById('myListView');
+            const grid = document.getElementById('myListGrid');
+            grid.innerHTML = '';
+
+            let myListArray = window.loggedUser.myList || [];
+            
+            // Filtra os filmes sem repetir
+            myListArray.forEach(id => {
+                const movie = window.movies.find(m => m.id === id); // Usa o movies global
+                if (movie) {
+                    const img = document.createElement('img');
+                    img.className = 'poster';
+                    img.src = movie.poster;
+                    img.onclick = () => window.openModal(movie);
+                    grid.appendChild(img);
+                }
+            });
+
+            view.style.display = 'block';
+            window.scrollTo(0, 0);
+        };
+
+        window.closeMyListScreen = function() {
+            document.getElementById('myListView').style.display = 'none';
+            window.resetSearch(); // Volta para o início
+        };
+
+        // 3. LÓGICA DO LETTERBOXD (Avaliações ao vivo)
+        window.openModal = function(movie) {
+            currentOpenMovieId = movie.id;
+            const modal = document.getElementById('modal');
+            
+            // Preenche dados normais
+            document.getElementById('modalPoster').src = movie.poster;
+            document.getElementById('modalTitle').textContent = movie.title;
+            document.getElementById('modalYear').textContent = movie.year;
+            document.getElementById('modalCategory').textContent = Array.isArray(movie.category) ? movie.category.join(', ') : movie.category;
+            document.getElementById('modalDesc').textContent = movie.synopsis;
+            document.getElementById('modalDirector').textContent = movie.director;
+            document.getElementById('modalCast').textContent = movie.cast;
+            document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
+            
+            // Checa se tá na Minha Lista
+            let myListArray = window.loggedUser.myList || [];
+            document.getElementById('myListIcon').textContent = myListArray.includes(movie.id) ? '✓' : '+';
+
+            // Reseta input de review
+            document.getElementById('reviewText').value = '';
+            setStars(0);
+
+            // Escuta Comentários AO VIVO no Firebase
+            if(reviewsUnsubscribe) reviewsUnsubscribe(); // Para de ouvir o filme anterior
+            const q = query(collection(db, "reviews"), where("movieId", "==", movie.id));
+            
+            reviewsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const reviews = [];
+                snapshot.forEach(doc => reviews.push(doc.data()));
+                reviews.sort((a, b) => b.timestamp - a.timestamp); // Mais recentes primeiro
+                
+                const listEl = document.getElementById('reviewsList');
+                listEl.innerHTML = '';
+                
+                if(reviews.length === 0) {
+                    listEl.innerHTML = '<p style="color: #666; font-size: 0.9rem;">Seja o primeiro a avaliar.</p>';
+                } else {
+                    reviews.forEach(r => {
+                        const starsHTML = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                        listEl.innerHTML += `
+                            <div class="review-item">
+                                <div class="review-header">
+                                    <img src="${r.avatar}" class="review-avatar">
+                                    <span class="review-author">${r.authorName}</span>
+                                    <span class="review-stars">${starsHTML}</span>
+                                </div>
+                                <div class="review-text">${r.text}</div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        // Sistema das Estrelinhas
+        const stars = document.querySelectorAll('#starRating span');
+        stars.forEach(star => {
+            star.onclick = function() { setStars(this.getAttribute('data-value')); };
+        });
+
+        function setStars(value) {
+            currentRating = parseInt(value);
+            stars.forEach(s => {
+                s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= currentRating);
+            });
+        }
+
+        window.submitReview = async function() {
+            const text = document.getElementById('reviewText').value.trim();
+            if (currentRating === 0 || text === '') {
+                alert("Dê uma nota e escreva um comentário!");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "reviews"), {
+                    movieId: currentOpenMovieId,
+                    profileId: window.loggedUser.id,
+                    authorName: window.loggedUser.name,
+                    avatar: window.loggedUser.avatar,
+                    rating: currentRating,
+                    text: text,
+                    timestamp: Date.now() // Hora atual
+                });
+                
+                // Limpa o campo
+                document.getElementById('reviewText').value = '';
+                setStars(0);
+            } catch (e) { console.error("Erro ao postar review: ", e); }
+        };
+
+        // Precisamos exportar o movies para o firebase usar
+        window.movies = movies;
+
     </script>
 
     <script>
@@ -2933,27 +3223,6 @@
             renderCatalog(movies);
         }
 
-        function openModal(movie) {
-            const modal = document.getElementById('modal');
-            const poster = document.getElementById('modalPoster');
-            poster.src = movie.poster;
-            poster.referrerPolicy = 'no-referrer';
-            
-            document.getElementById('modalTitle').textContent = movie.title;
-            document.getElementById('modalYear').textContent = movie.year;
-            
-            const catDisplay = Array.isArray(movie.category) ? movie.category.join(', ') : movie.category;
-            document.getElementById('modalCategory').textContent = catDisplay;
-            
-            document.getElementById('modalDesc').textContent = movie.synopsis;
-            document.getElementById('modalDirector').textContent = movie.director;
-            document.getElementById('modalCast').textContent = movie.cast;
-            document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
-            
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
 
         function openCollectionView(collection) {
             const view = document.getElementById('collectionView');
@@ -3020,18 +3289,5 @@
             });
         }
     </script>
-    
-    <div id="bottomNavBar" class="bottom-nav-bar">
-        <div class="bottom-nav-item" onclick="openMyListScreen()">
-            <span class="bottom-nav-icon">+</span>
-            <span>Minha Lista</span>
-        </div>
-        
-        <div class="bottom-nav-item" onclick="openProfileSettings()">
-            <img src="" id="bottomProfileImg" class="bottom-profile-img">
-            <span>Perfil</span>
-        </div>
-    </div>
-
 </body>
 </html>
