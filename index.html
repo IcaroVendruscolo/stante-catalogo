@@ -717,6 +717,10 @@
         .my-list-add-btn:hover { color: white; }
         .my-list-icon { font-size: 1.5rem; font-weight: bold; border: 2px solid currentColor; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; margin-bottom: 5px; }
         .my-list-text { font-size: 0.8rem; }
+        
+        .review-actions { margin-left: auto; display: flex; gap: 12px; }
+        .review-actions button { background: transparent; border: none; color: #888; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+        .review-actions button:hover { color: var(--accent-color); }
 
         .reviews-section { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-top: 20px; }
         .review-input-box { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 20px; }
@@ -755,15 +759,17 @@
       <div id="maxProfileScreen" class="max-screen-wrapper">
         
         <div id="viewSelectProfiles" class="max-view">
-            <div class="max-header">
+            <div id="editProfilesHeader" class="max-header" style="display: none;">
                 <span class="max-header-left" style="font-weight: bold; letter-spacing: 1px;">EDITAR PERFIS</span>
-                <button class="max-header-right" onclick="enterEditMode()">Pronto</button>
+                <button class="max-header-right" onclick="exitEditMode()">Pronto</button>
             </div>
             
             <div class="max-content">
+                <h1 id="whoIsWatchingTitle" style="font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 40px; font-weight: normal; text-align: center;">Quem vai assistir?</h1>
+                
                 <div class="max-profiles-row" id="maxProfilesContainer">
                     <div class="loader" style="color: white;">Conectando...</div>
-                    </div>
+                </div>
                 
                 <div class="max-add-container">
                     <button class="max-add-btn" onclick="openCreateView()">+</button>
@@ -906,7 +912,9 @@
                             <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
                         </div>
                         <textarea id="reviewText" placeholder="Adicione seu comentário..." maxlength="250"></textarea>
-                        <button class="btn-primary" onclick="window.submitReview()" style="padding: 8px 15px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer;">Publicar</button>
+                        <button id="submitReviewBtn" class="btn-primary" onclick="window.submitReview()" style="padding: 8px 15px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer;">Publicar</button>
+                        <button id="cancelEditBtn" onclick="window.cancelEditReview()" style="display:none; background: transparent; color: #888; border: none; cursor: pointer; margin-left: 10px;">Cancelar Edição</button>
+
                     </div>
                     <div id="reviewsList" class="reviews-list">
                         </div>
@@ -952,7 +960,8 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
 
         // SUAS CHAVES (Já coloquei as suas aqui)
         const firebaseConfig = {
@@ -998,19 +1007,41 @@
         });
 
         // 2. DESENHA A TELA INICIAL (Editar Perfis)
+        window.isEditMode = false; // Controle de estado da tela
+
+        window.exitEditMode = function() {
+            window.isEditMode = false;
+            renderMainScreen(); // Recarrega a tela no formato limpo
+        };
+
+        window.goToEditProfiles = function() {
+            closeProfileMenu();
+            window.isEditMode = true; // Liga o modo de edição
+            
+            document.body.style.overflow = 'hidden'; 
+            document.querySelector('header').style.display = 'none';
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('bottomNavBar').style.display = 'none';
+            
+            document.getElementById('maxProfileScreen').style.display = 'block';
+            renderMainScreen(); 
+        };
+
+        // 2. DESENHA A TELA INICIAL (Editar Perfis)
         function renderMainScreen() {
             const container = document.getElementById('maxProfilesContainer');
             container.innerHTML = '';
 
-            // Esconde o site por trás para não dar rolagem!
             document.body.style.overflow = 'hidden'; 
-            
-            // CORREÇÃO 1: Aqui era 'nav', agora é 'header'
             document.querySelector('header').style.display = 'none';
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('catalog').style.display = 'none';
 
-            // Loop que desenha os avatares
+            // Alterna os visuais com base no modo
+            document.getElementById('editProfilesHeader').style.display = window.isEditMode ? 'flex' : 'none';
+            document.getElementById('whoIsWatchingTitle').style.display = window.isEditMode ? 'none' : 'block';
+
             allProfiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'max-profile-card';
@@ -1019,27 +1050,26 @@
                     <span class="max-profile-name">${profile.name}</span>
                 `;
                 
-                // O que acontece ao clicar no perfil
                 card.onclick = () => {
-                    window.loggedUser = profile; // Salva quem logou
-                    document.getElementById('maxProfileScreen').style.display = 'none'; // Some com a tela de perfis
-                    
-                    // Revela o site
-                    document.body.style.overflow = 'auto'; 
-                    
-                    // CORREÇÃO 2: Aqui era 'nav', agora é 'header'
-                    document.querySelector('header').style.display = 'flex';
-                    document.getElementById('heroCarouselWrapper').style.display = 'block';
-                    document.getElementById('catalog').style.display = 'block';
+                    if (window.isEditMode) {
+                        alert(`No futuro, aqui abrirá a tela para alterar o nome ou foto de: ${profile.name}`);
+                    } else {
+                        // Login Normal
+                        window.loggedUser = profile; 
+                        document.getElementById('maxProfileScreen').style.display = 'none'; 
+                        
+                        document.body.style.overflow = 'auto'; 
+                        document.querySelector('header').style.display = 'flex';
+                        document.getElementById('heroCarouselWrapper').style.display = 'block';
+                        document.getElementById('catalog').style.display = 'block';
 
-                    // Atualiza a Barra Inferior com a foto do usuário
-                    document.getElementById('bottomNavBar').style.display = 'flex';
-                    document.getElementById('bottomProfileImg').src = profile.avatar;
+                        document.getElementById('bottomNavBar').style.display = 'flex';
+                        document.getElementById('bottomProfileImg').src = profile.avatar;
+                    }
                 };
                 container.appendChild(card);
             });
 
-            // Oculta o botão + se chegar a 7 perfis
             document.querySelector('.max-add-container').style.display = (allProfiles.length >= 7) ? 'none' : 'flex';
         }
 
@@ -1246,14 +1276,17 @@
             document.getElementById('reviewText').value = '';
             setStars(0);
 
+            // Variável Global para saber se estamos editando
+            window.editingReviewId = null;
+
             // Escuta Comentários AO VIVO no Firebase
-            if(reviewsUnsubscribe) reviewsUnsubscribe(); // Para de ouvir o filme anterior
+            if(reviewsUnsubscribe) reviewsUnsubscribe(); 
             const q = query(collection(db, "reviews"), where("movieId", "==", movie.id));
             
             reviewsUnsubscribe = onSnapshot(q, (snapshot) => {
                 const reviews = [];
-                snapshot.forEach(doc => reviews.push(doc.data()));
-                reviews.sort((a, b) => b.timestamp - a.timestamp); // Mais recentes primeiro
+                snapshot.forEach(d => reviews.push({ id: d.id, ...d.data() })); // Agora puxa o ID único de cada comentário
+                reviews.sort((a, b) => b.timestamp - a.timestamp); 
                 
                 const listEl = document.getElementById('reviewsList');
                 listEl.innerHTML = '';
@@ -1263,12 +1296,25 @@
                 } else {
                     reviews.forEach(r => {
                         const starsHTML = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                        let actionsHTML = '';
+                        
+                        // SEGREDO DE SEGURANÇA: Só mostra botões se o dono logado for igual ao dono do post
+                        if (window.loggedUser && r.profileId === window.loggedUser.id) {
+                            actionsHTML = `
+                                <div class="review-actions">
+                                    <button onclick="window.editReview('${r.id}', '${r.text.replace(/'/g, "\\'")}', ${r.rating})">Editar</button>
+                                    <button onclick="window.deleteReview('${r.id}')">Excluir</button>
+                                </div>
+                            `;
+                        }
+
                         listEl.innerHTML += `
                             <div class="review-item">
                                 <div class="review-header">
                                     <img src="${r.avatar}" class="review-avatar">
                                     <span class="review-author">${r.authorName}</span>
                                     <span class="review-stars">${starsHTML}</span>
+                                    ${actionsHTML}
                                 </div>
                                 <div class="review-text">${r.text}</div>
                             </div>
@@ -1276,6 +1322,62 @@
                     });
                 }
             });
+
+        // --- FUNÇÕES DE EDIÇÃO E EXCLUSÃO ---
+        window.editReview = function(id, text, rating) {
+            window.editingReviewId = id;
+            document.getElementById('reviewText').value = text;
+            setStars(rating);
+            document.getElementById('submitReviewBtn').textContent = 'Salvar Edição';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        };
+
+        window.cancelEditReview = function() {
+            window.editingReviewId = null;
+            document.getElementById('reviewText').value = '';
+            setStars(0);
+            document.getElementById('submitReviewBtn').textContent = 'Publicar';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        };
+
+        window.deleteReview = async function(id) {
+            if(confirm("Tem certeza que deseja excluir esta avaliação?")) {
+                await deleteDoc(doc(db, "reviews", id));
+            }
+        };
+
+        window.submitReview = async function() {
+            const text = document.getElementById('reviewText').value.trim();
+            if (currentRating === 0 || text === '') {
+                alert("Dê uma nota e escreva um comentário!");
+                return;
+            }
+
+            try {
+                if (window.editingReviewId) {
+                    // MODO ATUALIZAR
+                    await updateDoc(doc(db, "reviews", window.editingReviewId), {
+                        rating: currentRating,
+                        text: text
+                    });
+                } else {
+                    // MODO CRIAR NOVO
+                    await addDoc(collection(db, "reviews"), {
+                        movieId: currentOpenMovieId,
+                        profileId: window.loggedUser.id,
+                        authorName: window.loggedUser.name,
+                        avatar: window.loggedUser.avatar,
+                        rating: currentRating,
+                        text: text,
+                        timestamp: Date.now() 
+                    });
+                }
+                
+                // Limpa o campo após postar/editar
+                window.cancelEditReview();
+            } catch (e) { console.error("Erro ao processar review: ", e); }
+        };
+
 
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2999,11 +3101,27 @@
         function updateCarouselPosition() {
             const track = document.getElementById('heroCarousel');
             const slides = document.querySelectorAll('.hero-slide');
+            const dots = document.querySelectorAll('.dot');
             if (slides.length === 0) return;
 
+            // Trava de segurança para não quebrar o Loop
+            if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
+            if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
+
+            // A mágica que impede o banner de ficar escuro
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlideIndex) slide.classList.add('active');
+            });
+
+            dots.forEach((dot, index) => {
+                dot.classList.remove('active');
+                if (index === currentSlideIndex) dot.classList.add('active');
+            });
+
+            // Move o trilho suavemente
             const activeSlide = slides[currentSlideIndex];
             const wrapper = document.getElementById('heroCarouselWrapper');
-
             const offsetLeft = activeSlide.offsetLeft;
             const centerOffset = (wrapper.clientWidth - activeSlide.offsetWidth) / 2;
             const finalPosition = offsetLeft - centerOffset;
@@ -3011,38 +3129,29 @@
             track.style.transform = `translateX(-${finalPosition}px)`;
         }
 
-        function updateDotsAndSlides() {
-            const dots = document.querySelectorAll('.dot');
-            const slides = document.querySelectorAll('.hero-slide');
-
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentSlideIndex);
-            });
-
-            slides.forEach((slide, index) => {
-                slide.classList.toggle('active', index === currentSlideIndex);
-            });
-        }
-
         function goToSlide(index) {
             if (index === currentSlideIndex) return;
             currentSlideIndex = index;
-            updateDotsAndSlides();
             updateCarouselPosition();
-            startCarousel(); // Reseta o timer de 8s
+            startCarousel(); 
         }
 
         function nextSlide() {
             const slides = document.querySelectorAll('.hero-slide');
             if (slides.length <= 1) return;
-            currentSlideIndex = (currentSlideIndex + 1) % slides.length;
-            goToSlide(currentSlideIndex);
+            
+            currentSlideIndex++;
+            if (currentSlideIndex >= slides.length) {
+                currentSlideIndex = 0; // Volta para o primeiro filme (Looping eterno)
+            }
+            updateCarouselPosition();
         }
 
         function startCarousel() {
             if (carouselInterval) clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 5000); // 5s
+            carouselInterval = setInterval(nextSlide, 5000); 
         }
+
 
         function renderCatalog(filteredMovies = movies) {
             const catalogEl = document.getElementById('catalog');
