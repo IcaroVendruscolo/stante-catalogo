@@ -734,6 +734,13 @@
 
         .reviews-section { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-top: 20px; }
         .review-input-box { display: flex; flex-direction: column; align-items: flex-end; margin-bottom: 20px; }
+                .fake-review-input { width: 100%; background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 12px 15px; border-radius: 6px; font-size: 0.95rem; cursor: text; margin-bottom: 20px; transition: border-color 0.2s; text-align: left; }
+        .fake-review-input:hover { border-color: #555; color: #ccc; }
+        .review-action-buttons { display: flex; gap: 10px; width: 100%; justify-content: flex-end; margin-top: 10px; }
+        .review-action-buttons button { padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        #cancelEditBtn { background: transparent; color: #888; border: 1px solid #444; }
+        #cancelEditBtn:hover { background: rgba(255,255,255,0.1); color: white; }
+
         .review-input-box textarea { width: 100%; background: #1a1a1a; border: 1px solid #333; color: white; padding: 10px; border-radius: 6px; resize: none; height: 80px; font-family: inherit; }
         .star-rating { display: flex; flex-direction: row-reverse; gap: 5px; margin-bottom: 10px; width: 100%; justify-content: flex-end; }
         .star-rating span { font-size: 1.5rem; color: #444; cursor: pointer; transition: color 0.2s; }
@@ -1031,15 +1038,23 @@
 
                 <div class="reviews-section">
                     <h3 style="margin-bottom: 10px; font-size: 1.1rem; color: #ccc;">Comentários</h3>
-                    <div class="review-input-box">
+                    
+                    <div id="fakeReviewInput" class="fake-review-input" onclick="window.expandReviewBox()">
+                        Adicione um comentário...
+                    </div>
+
+                    <div id="realReviewBox" class="review-input-box" style="display: none;">
                         <div class="star-rating" id="starRating">
                             <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
                         </div>
-                        <textarea id="reviewText" placeholder="Adicione seu comentário..." maxlength="250"></textarea>
-                        <button id="submitReviewBtn" class="btn-primary" onclick="window.submitReview()" style="padding: 8px 15px; margin-top: 10px; border-radius: 4px; border: none; cursor: pointer;">Publicar</button>
-                        <button id="cancelEditBtn" onclick="window.cancelEditReview()" style="display:none; background: transparent; color: #888; border: none; cursor: pointer; margin-left: 10px;">Cancelar Edição</button>
-
+                        <textarea id="reviewText" placeholder="Escreva seu comentário aqui..." maxlength="250"></textarea>
+                        
+                        <div class="review-action-buttons">
+                            <button id="cancelEditBtn" onclick="window.cancelEditReview()">Cancelar</button>
+                            <button id="submitReviewBtn" class="btn-primary" onclick="window.submitReview()">Publicar</button>
+                        </div>
                     </div>
+
                     <div id="reviewsList" class="reviews-list">
                         </div>
                 </div>
@@ -1517,16 +1532,16 @@
             document.getElementById('modalDirector').textContent = movie.director;
             document.getElementById('modalCast').textContent = movie.cast;
             document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
-           // Injeta as notas IMDb e RT
+            
+            // Injeta as notas IMDb e RT
             injectRatings(movie.id);
             
             // Checa se tá na Minha Lista
             let myListArray = window.loggedUser.myList || [];
             document.getElementById('myListIcon').textContent = myListArray.includes(movie.id) ? '✓' : '+';
 
-            // Reseta input de review
-            document.getElementById('reviewText').value = '';
-            setStars(0);
+            // Recolhe a caixa de comentários
+            if(window.cancelEditReview) window.cancelEditReview();
 
             // Variável Global para saber se estamos editando
             window.editingReviewId = null;
@@ -1537,7 +1552,7 @@
             
             reviewsUnsubscribe = onSnapshot(q, (snapshot) => {
                 const reviews = [];
-                snapshot.forEach(d => reviews.push({ id: d.id, ...d.data() })); // Agora puxa o ID único de cada comentário
+                snapshot.forEach(d => reviews.push({ id: d.id, ...d.data() }));
                 reviews.sort((a, b) => b.timestamp - a.timestamp); 
                 
                 const listEl = document.getElementById('reviewsList');
@@ -1575,21 +1590,55 @@
                 }
             });
 
-        // --- FUNÇÕES DE EDIÇÃO E EXCLUSÃO ---
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+
+        // Sistema das Estrelinhas
+        const stars = document.querySelectorAll('#starRating span');
+        stars.forEach(star => {
+            star.onclick = function() { window.setStars(this.getAttribute('data-value')); };
+        });
+
+        window.setStars = function(value) {
+            currentRating = parseInt(value);
+            stars.forEach(s => {
+                s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= currentRating);
+            });
+        };
+
+        // --- FUNÇÕES DA CAIXA DE COMENTÁRIOS E EDIÇÃO ---
+        window.expandReviewBox = function() {
+            document.getElementById('fakeReviewInput').style.display = 'none';
+            document.getElementById('realReviewBox').style.display = 'flex';
+            document.getElementById('reviewText').focus();
+        };
+
         window.editReview = function(id, text, rating) {
+            window.expandReviewBox(); // Abre a caixa automaticamente
             window.editingReviewId = id;
             document.getElementById('reviewText').value = text;
-            setStars(rating);
+            window.setStars(rating);
             document.getElementById('submitReviewBtn').textContent = 'Salvar Edição';
-            document.getElementById('cancelEditBtn').style.display = 'inline-block';
         };
 
         window.cancelEditReview = function() {
             window.editingReviewId = null;
-            document.getElementById('reviewText').value = '';
-            setStars(0);
-            document.getElementById('submitReviewBtn').textContent = 'Publicar';
-            document.getElementById('cancelEditBtn').style.display = 'none';
+            const reviewInput = document.getElementById('reviewText');
+            if(reviewInput) reviewInput.value = '';
+            window.setStars(0);
+            
+            const submitBtn = document.getElementById('submitReviewBtn');
+            if(submitBtn) submitBtn.textContent = 'Publicar';
+            
+            // Recolhe a caixa de volta para o modo minimalista
+            const realBox = document.getElementById('realReviewBox');
+            const fakeBox = document.getElementById('fakeReviewInput');
+            if(realBox) realBox.style.display = 'none';
+            if(fakeBox) {
+                fakeBox.style.display = 'block';
+                fakeBox.textContent = 'Adicione um comentário...';
+            }
         };
 
         window.deleteReview = async function(id) {
@@ -1628,48 +1677,6 @@
                 // Limpa o campo após postar/editar
                 window.cancelEditReview();
             } catch (e) { console.error("Erro ao processar review: ", e); }
-        };
-
-
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        };
-
-        // Sistema das Estrelinhas
-        const stars = document.querySelectorAll('#starRating span');
-        stars.forEach(star => {
-            star.onclick = function() { setStars(this.getAttribute('data-value')); };
-        });
-
-        function setStars(value) {
-            currentRating = parseInt(value);
-            stars.forEach(s => {
-                s.classList.toggle('active', parseInt(s.getAttribute('data-value')) <= currentRating);
-            });
-        }
-
-        window.submitReview = async function() {
-            const text = document.getElementById('reviewText').value.trim();
-            if (currentRating === 0 || text === '') {
-                alert("Dê uma nota e escreva um comentário!");
-                return;
-            }
-
-            try {
-                await addDoc(collection(db, "reviews"), {
-                    movieId: currentOpenMovieId,
-                    profileId: window.loggedUser.id,
-                    authorName: window.loggedUser.name,
-                    avatar: window.loggedUser.avatar,
-                    rating: currentRating,
-                    text: text,
-                    timestamp: Date.now() // Hora atual
-                });
-                
-                // Limpa o campo
-                document.getElementById('reviewText').value = '';
-                setStars(0);
-            } catch (e) { console.error("Erro ao postar review: ", e); }
         };
 
         // Precisamos exportar o movies para o firebase usar
@@ -3283,21 +3290,18 @@
             document.getElementById('catalog').style.display = 'block';
             
             renderCatalog(filtered);
-        }/* ================================ */
-        /* JS DO NOVO CARROSSEL DISNEY+     */
-        /* ================================ */
+        }        
+        // ================================ //
+        // CARROSSEL DISNEY+ (LOOP INFINITO) //
+        // ================================ //
         function setupHeroCarousel() {
             const carouselIds = [6, 114, 123, 10, 1, 138]; 
             
             carouselIds.forEach(id => {
                 const movie = movies.find(m => m.id === id);
                 if (movie) {
-                    if (!movie.heroImage) {
-                        movie.heroImage = `https://picsum.photos/seed/hero_${movie.id}/1200/600`;
-                    }
-                    if (!movie.heroImageMobile) {
-                        movie.heroImageMobile = movie.heroImage;
-                    }
+                    if (!movie.heroImage) movie.heroImage = `https://picsum.photos/seed/hero_${movie.id}/1200/600`;
+                    if (!movie.heroImageMobile) movie.heroImageMobile = movie.heroImage;
                     heroMovies.push(movie);
                 }
             });
@@ -3307,30 +3311,29 @@
             carouselEl.innerHTML = '';
             dotsEl.innerHTML = '';
 
-            heroMovies.forEach((movie, index) => {
+            const createSlideHTML = (movie, index) => {
                 const slide = document.createElement('div');
                 slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
-                
                 slide.style.setProperty('--bg-desktop', `url("${movie.heroImage}")`);
                 slide.style.setProperty('--bg-mobile', `url("${movie.heroImageMobile}")`);
-                
                 slide.innerHTML = `
                     <div class="hero-content">
                         <h1 class="hero-title">${movie.title}</h1>
                         <p class="hero-desc">${movie.synopsis}</p>
-                        <button class="btn btn-primary" onclick='openModalById(${movie.id})'>Mais Informações</button>
+                        <button class="btn btn-primary" onclick='window.openModalById(${movie.id}, event)'>Mais Informações</button>
                     </div>
                 `;
-                
-                // Se o usuário clicar no filme do lado, o carrossel vai até ele
                 slide.onclick = (e) => {
-                    if (index !== currentSlideIndex) {
+                    if (e.target.tagName !== 'BUTTON' && index !== currentSlideIndex && index < heroMovies.length) {
                         e.preventDefault(); 
                         goToSlide(index);
                     }
                 };
+                return slide;
+            };
 
-                carouselEl.appendChild(slide);
+            heroMovies.forEach((movie, index) => {
+                carouselEl.appendChild(createSlideHTML(movie, index));
 
                 const dot = document.createElement('div');
                 dot.className = `dot ${index === 0 ? 'active' : ''}`;
@@ -3338,51 +3341,71 @@
                 dotsEl.appendChild(dot);
             });
 
+            // Clona o primeiro e joga no fim
+            if (heroMovies.length > 0) {
+                const cloneSlide = createSlideHTML(heroMovies[0], heroMovies.length);
+                cloneSlide.classList.remove('active');
+                carouselEl.appendChild(cloneSlide);
+            }
+
             window.addEventListener('resize', updateCarouselPosition);
             setTimeout(updateCarouselPosition, 100);
             startCarousel();
         }
 
-        // Função do botão "Mais informações"
-        function openModalById(id) {
-            const movie = movies.find(m => m.id === id);
-            if (movie) openModal(movie);
+        window.openModalById = function(id, event) {
+            if (event) event.stopPropagation(); 
+            const movie = window.movies.find(m => m.id === id);
+            if (movie) window.openModal(movie);
         }
 
-        // A Matemática que centraliza o card e mostra as pontas
         function updateCarouselPosition() {
             const track = document.getElementById('heroCarousel');
             const slides = document.querySelectorAll('.hero-slide');
             const dots = document.querySelectorAll('.dot');
             if (slides.length === 0) return;
 
-            // Trava de segurança para não quebrar o Loop
-            if (currentSlideIndex >= slides.length) currentSlideIndex = 0;
-            if (currentSlideIndex < 0) currentSlideIndex = slides.length - 1;
-
-            // A mágica que impede o banner de ficar escuro
             slides.forEach((slide, index) => {
                 slide.classList.remove('active');
                 if (index === currentSlideIndex) slide.classList.add('active');
             });
 
+            const realDotIndex = currentSlideIndex >= dots.length ? 0 : currentSlideIndex;
             dots.forEach((dot, index) => {
                 dot.classList.remove('active');
-                if (index === currentSlideIndex) dot.classList.add('active');
+                if (index === realDotIndex) dot.classList.add('active');
             });
 
-            // Move o trilho suavemente
             const activeSlide = slides[currentSlideIndex];
             const wrapper = document.getElementById('heroCarouselWrapper');
             const offsetLeft = activeSlide.offsetLeft;
             const centerOffset = (wrapper.clientWidth - activeSlide.offsetWidth) / 2;
             const finalPosition = offsetLeft - centerOffset;
 
+            track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
             track.style.transform = `translateX(-${finalPosition}px)`;
+
+            // Volta invisível se bater no clone
+            if (currentSlideIndex === slides.length - 1) {
+                setTimeout(() => {
+                    track.style.transition = 'none'; 
+                    currentSlideIndex = 0; 
+                    
+                    const realFirst = slides[0];
+                    const realOffset = realFirst.offsetLeft - centerOffset;
+                    track.style.transform = `translateX(-${realOffset}px)`;
+                    
+                    slides[slides.length - 1].classList.remove('active');
+                    slides[0].classList.add('active');
+                    
+                    // Força o navegador a renderizar o pulo invisível
+                    void track.offsetWidth; 
+                }, 600); 
+            }
         }
 
         function goToSlide(index) {
-            if (index === currentSlideIndex) return;
+            if (index === currentSlideIndex || currentSlideIndex === heroMovies.length) return;
             currentSlideIndex = index;
             updateCarouselPosition();
             startCarousel(); 
@@ -3393,9 +3416,6 @@
             if (slides.length <= 1) return;
             
             currentSlideIndex++;
-            if (currentSlideIndex >= slides.length) {
-                currentSlideIndex = 0; // Volta para o primeiro filme (Looping eterno)
-            }
             updateCarouselPosition();
         }
 
