@@ -352,7 +352,7 @@
         }
 
         .row {
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .row-title {
@@ -364,9 +364,9 @@
         .row-posters {
             display: flex;
             overflow-x: auto;
-            padding: 20px 4%;
+            padding: 5px 4% 12px;
             scroll-behavior: smooth;
-            gap: 15px;
+            gap: 10px;
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
@@ -3498,7 +3498,15 @@
 
                 // CORREÇÃO AQUI: Criando um novo container para a categoria atual
                 const categoryPostersContainer = document.createElement('div');
-                categoryPostersContainer.className = 'row-posters';
+               
+                // A MÁGICA DA GRADE: Se for um filtro de categoria, vira grade. Se for tela inicial, vira carrossel.
+                if (isCategoryFilter) {
+                    categoryPostersContainer.className = 'search-grid';
+                    categoryPostersContainer.style.display = 'grid';
+                    categoryPostersContainer.style.paddingTop = '20px'; // Dá um respiro do título
+                } else {
+                    categoryPostersContainer.className = 'row-posters';
+                }
 
                 categoryMovies.forEach(movie => {
                     const img = document.createElement('img');
