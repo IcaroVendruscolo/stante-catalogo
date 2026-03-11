@@ -762,6 +762,116 @@
 
             }
         }
+        /* ================================ */
+        /* BOTÃO ALEATÓRIO E AVALIAÇÕES     */
+        /* ================================ */
+        
+        .header-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; /* Garante o alinhamento perfeito entre lupa e aleatório */
+        }
+
+        .random-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            background: transparent; 
+            border: 1px solid transparent; 
+            transition: all 0.3s ease; 
+            border-radius: 30px; /* Borda 100% arredondada estilo pílula */
+            height: 35px; /* Trava a altura para não empurrar o texto para baixo */
+            overflow: hidden; /* Não deixa o texto vazar */
+        }
+        
+        .random-container.expanded { 
+            background: rgba(255, 255, 255, 0.1); 
+            border-color: #fff; /* Revela a borda branca arredondada */
+        }
+
+        .random-icon { 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: #fff; 
+            width: 35px; 
+            height: 35px; 
+            border-radius: 50%; 
+            background: rgba(255,255,255,0.1); 
+            transition: all 0.2s;
+        }
+        
+        .random-icon:hover { 
+            background: rgba(255,255,255,0.3); 
+            transform: rotate(180deg); 
+        }
+
+        /* SOME COM O ÍCONE ASSIM QUE CLICAR */
+        .random-container.expanded .random-icon {
+            display: none;
+        }
+
+        .random-input { 
+            background: transparent; 
+            border: none; 
+            color: #fff; 
+            padding: 0; 
+            width: 0; 
+            outline: none; 
+            transition: all 0.3s ease; 
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            font-weight: bold;
+            white-space: nowrap; /* Impede o texto de quebrar de linha */
+            text-align: center;
+        }
+        
+        /* EXIBE SOMENTE O TEXTO NA CAIXA ARREDONDADA */
+        .random-container.expanded .random-input { 
+            width: 150px; 
+            padding: 0 15px; 
+        }
+
+        .rating-badges { display: flex; gap: 15px; margin-bottom: 20px; font-family: Arial, sans-serif;}
+        .badge-imdb { background-color: #f5c518; color: #000; font-weight: 900; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; letter-spacing: -0.5px;}
+        .badge-rt { background-color: #fa320a; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;}
+
+        /* ================================ */
+        /* MODAL DA ROLETA E PÍLULAS        */
+        /* ================================ */
+        .roulette-content { background-color: #fff; color: #000; width: 90%; max-width: 500px; border-radius: 20px; padding: 40px 30px; position: relative; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.active .roulette-content { transform: scale(1); }
+        .roulette-title { text-align: center; font-size: 1.8rem; font-weight: 800; margin-bottom: 5px; }
+        
+        .roulette-categories { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+        .category-pill { display: flex; align-items: center; gap: 8px; padding: 10px 18px; border: 2px solid #eee; border-radius: 50px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #555; transition: all 0.2s; user-select: none; }
+        .category-pill:hover { border-color: #ccc; }
+        .category-pill.selected { border-color: var(--accent-color); background-color: rgba(229, 9, 20, 0.1); color: var(--accent-color); }
+        .pill-icon { font-size: 1.2rem; }
+
+        .draw-btn { background-color: #ddd; color: #aaa; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: not-allowed; transition: all 0.3s; }
+        .draw-btn.active { background-color: var(--accent-color); color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4); transform: scale(1.05); }
+
+        /* ================================ */
+        /* ANIMAÇÃO DO DVD                  */
+        /* ================================ */
+        .dvd-loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .dvd-animation-container { position: relative; width: 150px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
+        .dvd-player-slot { width: 120px; height: 12px; background: #333; border-radius: 10px; border: 2px solid #555; z-index: 10; }
+        .dvd-disc { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #e6e6e6, #fff, #ccc); border: 15px solid #111; position: absolute; bottom: 5px; z-index: 5; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+        .dvd-hole { width: 20px; height: 20px; border-radius: 50%; background: transparent; border: 2px solid #ddd; }
+        .dvd-loading-text { color: white; font-size: 1.2rem; animation: pulseText 1s infinite alternate; font-weight: normal; }
+        
+        @keyframes pulseText { from { opacity: 0.5; } to { opacity: 1; } }
+        @keyframes insertDvd { 
+            0% { transform: translateY(-80px) rotate(0deg); opacity: 0; }
+            30% { transform: translateY(-40px) rotate(180deg); opacity: 1; }
+            70% { transform: translateY(-40px) rotate(360deg); opacity: 1; }
+            100% { transform: translateY(10px) rotate(540deg); opacity: 0; }
+        }
+        .animating-dvd { animation: insertDvd 2.5s ease-in-out forwards; }
+
     </style>
 </head>
 <body>
@@ -855,6 +965,13 @@
             </ul>
         </div>
         <div class="header-right">
+            <div class="random-container" id="randomContainer">
+                <div class="random-icon" onclick="toggleRandom()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.28l5.67-5.67"/></svg>
+                </div>
+                <input type="text" readonly class="random-input" value="Títulos Aleatórios" onclick="openRoulette()">
+            </div>
+
             <div class="search-container" id="searchContainer">
                 <div class="search-icon" onclick="toggleSearch()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
@@ -870,13 +987,6 @@
     </div>
     <div class="carousel-dots" id="carouselDots">
         </div>
-
-
-        <!-- Slides will be injected by JS -->
-    </section>
-    <div class="carousel-dots" id="carouselDots">
-        <!-- Dots will be injected by JS -->
-    </div>
 
     <h2 id="searchResultsTitle" class="search-results-title"></h2>
     <div id="searchGrid" class="search-grid"></div>
@@ -900,6 +1010,10 @@
                 <div class="modal-meta">
                     <span id="modalYear"></span>
                     <span id="modalCategory"></span>
+                </div>
+                <div class="rating-badges">
+                    <div class="badge-imdb">IMDb <span id="modalImdb"></span></div>
+                    <div class="badge-rt">🍅 <span id="modalRt"></span></div>
                 </div>
                 <p id="modalDesc" class="modal-desc"></p>
                 <div class="modal-details">
@@ -965,8 +1079,6 @@
         </div>
     </div>
 
-</body>
-
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
@@ -1012,9 +1124,22 @@
                     name: "Standard", dob: "01/01/2000", avatar: maxAvatars[0]
                 });
             } else {
-                renderMainScreen();
+                // NOVO: Atualiza os dados da "Minha Lista" silenciosamente na memória
+                if (window.loggedUser) {
+                    const updatedUser = allProfiles.find(p => p.id === window.loggedUser.id);
+                    if (updatedUser) {
+                        window.loggedUser = updatedUser;
+                    }
+                }
+
+                // NOVO: Só "apaga" o site e desenha os avatares SE a tela de perfis já estiver aberta
+                const profileScreen = document.getElementById('maxProfileScreen');
+                if (profileScreen.style.display !== 'none') {
+                    renderMainScreen();
+                }
             }
         });
+
 
         // 2. DESENHA A TELA INICIAL (Editar Perfis)
         window.isEditMode = false; // Controle de estado da tela
@@ -1162,7 +1287,122 @@
         window.enterEditMode = function() {
             console.log("Modo de edição ativado");
         };
+  
+        // ==========================================
+        // LÓGICA: ROLETA DE FILMES E NOTAS (IMDb/RT)
+        // ==========================================
         
+        // 1. Botão do Cabeçalho
+        window.toggleRandom = function() {
+            const container = document.getElementById('randomContainer');
+            container.classList.toggle('expanded');
+        };
+
+        // 2. Mapeamento de Emojis para as Pílulas
+        const categoryEmojis = {
+            "Terror Psicológico": "🧠", "Slasher": "🔪", "Sci-Fi": "👽", 
+            "Comédia": "😂", "Romance": "❤️", "Ação": "💥", 
+            "Aventura": "🗺️", "Life-Change Movies": "✨", "Animações": "🎨", 
+            "Marvel": "🦸‍♂️", "DC": "🦇", "Infantil": "🧸"
+        };
+        let selectedRouletteCategories = [];
+
+        // 3. Abrir a Roleta
+        window.openRoulette = function() {
+            document.getElementById('randomContainer').classList.remove('expanded');
+            const modal = document.getElementById('rouletteModal');
+            const grid = document.getElementById('rouletteCategoriesGrid');
+            const drawBtn = document.getElementById('drawBtn');
+            
+            // Reseta seleções
+            selectedRouletteCategories = [];
+            grid.innerHTML = '';
+            drawBtn.classList.remove('active');
+            drawBtn.disabled = true;
+
+            // Gera as pílulas baseadas nas categorias existentes
+            categories.forEach(cat => {
+                const pill = document.createElement('div');
+                pill.className = 'category-pill';
+                const emoji = categoryEmojis[cat] || "🎬";
+                pill.innerHTML = `<span class="pill-icon">${emoji}</span> ${cat}`;
+                
+                pill.onclick = () => {
+                    pill.classList.toggle('selected');
+                    if (selectedRouletteCategories.includes(cat)) {
+                        selectedRouletteCategories = selectedRouletteCategories.filter(c => c !== cat);
+                    } else {
+                        selectedRouletteCategories.push(cat);
+                    }
+                    
+                    // Acende ou apaga o botão
+                    if (selectedRouletteCategories.length > 0) {
+                        drawBtn.classList.add('active');
+                        drawBtn.disabled = false;
+                    } else {
+                        drawBtn.classList.remove('active');
+                        drawBtn.disabled = true;
+                    }
+                };
+                grid.appendChild(pill);
+            });
+
+            modal.classList.add('active');
+        };
+
+        window.closeRoulette = function() {
+            document.getElementById('rouletteModal').classList.remove('active');
+        };
+
+        // 4. O Sorteio e a Animação do DVD
+        window.startRouletteDraw = function() {
+            if (selectedRouletteCategories.length === 0) return;
+            
+            closeRoulette();
+            const dvdOverlay = document.getElementById('dvdLoading');
+            const disc = document.querySelector('.dvd-disc');
+            
+            // Inicia animação
+            dvdOverlay.style.display = 'flex';
+            disc.classList.remove('animating-dvd');
+            void disc.offsetWidth; // Truque para reiniciar a animação
+            disc.classList.add('animating-dvd');
+
+            // Pega todos os filmes que batem com as categorias escolhidas
+            let possibleMovies = window.movies.filter(m => {
+                if (Array.isArray(m.category)) {
+                    return m.category.some(c => selectedRouletteCategories.includes(c));
+                }
+                return selectedRouletteCategories.includes(m.category);
+            });
+
+            // Se a pessoa escolher uma categoria que não tem filmes (segurança)
+            if(possibleMovies.length === 0) possibleMovies = window.movies;
+
+            // Sorteia 1
+            const randomMovie = possibleMovies[Math.floor(Math.random() * possibleMovies.length)];
+
+            // Espera a animação acabar (2.5 segundos) e abre o filme
+            setTimeout(() => {
+                dvdOverlay.style.display = 'none';
+                window.openModal(randomMovie);
+            }, 2500);
+        };
+
+        // 5. Injetar as Notas Simuladas no Modal
+        // (Isso se conecta com a função openModal que já existe)
+        function injectRatings(movieId) {
+            // Gerador fixo baseado no ID (para que a nota de um filme nunca mude ao fechar e abrir)
+            // Se você quiser colocar nota real, basta adicionar imdb: "8.5" no array de filmes depois.
+            const movie = window.movies.find(m => m.id === movieId);
+            
+            const fakeImdb = movie.imdb || ((movieId % 3) + 6 + (movieId % 10) / 10).toFixed(1); 
+            const fakeRt = movie.rt || (60 + (movieId % 40)) + '%';
+
+            document.getElementById('modalImdb').textContent = `⭐ ${fakeImdb}`;
+            document.getElementById('modalRt').textContent = `${fakeRt}`;
+        }
+
         // ==========================================
         // LÓGICA: MINHA LISTA, REVIEWS E MENU PERFIL
         // ==========================================
@@ -1277,6 +1517,8 @@
             document.getElementById('modalDirector').textContent = movie.director;
             document.getElementById('modalCast').textContent = movie.cast;
             document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
+           // Injeta as notas IMDb e RT
+            injectRatings(movie.id);
             
             // Checa se tá na Minha Lista
             let myListArray = window.loggedUser.myList || [];
@@ -3408,5 +3650,31 @@
             });
         }
     </script>
+    
+        <div id="rouletteModal" class="modal-overlay" style="z-index: 3000;">
+        <div class="roulette-content">
+            <button class="modal-close" onclick="closeRoulette()" style="color: black;">×</button>
+            <h2 class="roulette-title">Títulos Aleatórios</h2>
+            <p style="text-align: center; color: #888; margin-bottom: 20px; font-size: 0.9rem;">Escolha uma categoria (ou várias) para o sorteio.</p>
+            
+            <div class="roulette-categories" id="rouletteCategoriesGrid">
+                </div>
+            
+            <div style="display: flex; justify-content: center; margin-top: 30px;">
+                <button id="drawBtn" class="draw-btn" disabled onclick="startRouletteDraw()">Sortear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dvdLoading" class="dvd-loading-overlay">
+        <div class="dvd-animation-container">
+            <div class="dvd-disc">
+                <div class="dvd-hole"></div>
+            </div>
+            <div class="dvd-player-slot"></div>
+        </div>
+        <h2 class="dvd-loading-text">Procurando na estante...</h2>
+    </div>
+
 </body>
 </html>
