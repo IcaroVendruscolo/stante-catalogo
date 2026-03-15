@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+deleteDoc }<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <!-- Google tag (gtag.js) -->
@@ -663,6 +663,22 @@
         /* ================================ */
         /* TELA DE PERFIS ESTILO MAX (CORRIGIDO) */
         /* ================================ */
+                /* ESTILO DO BOTÃO EDITAR DA TELA INICIAL */
+        .home-edit-btn { 
+            position: absolute; /* Tira o botão do fluxo normal da tela... */
+            bottom: 40px; /* ...e empurra ele 40 pixels pra cima a partir do chão... */
+            right: 40px; /* ...e 40 pixels pra esquerda a partir do canto direito! */
+            background: transparent; 
+            color: #888; 
+            border: 1px solid #555; 
+            padding: 8px 16px; 
+            border-radius: 4px; 
+            font-size: 0.9rem; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+        }
+        .home-edit-btn:hover { color: white; border-color: white; }
+
         .max-screen-wrapper {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #0f1014; z-index: 999999; color: white;
@@ -682,6 +698,10 @@
         
         /* A MÁGICA QUE RESOLVE O BUG DA IMAGEM GIGANTE */
         .max-profile-card { display: flex; flex-direction: column; align-items: center; cursor: pointer; width: 120px; }
+        
+                .max-avatar-wrapper { position: relative; display: inline-block; }
+        .profile-edit-overlay { position: absolute; top: 0; right: 0; background: white; color: black; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 10; font-weight: bold; }
+
         .max-avatar-img {
             width: 100px !important; height: 100px !important; 
             border-radius: 50% !important; object-fit: cover !important;
@@ -908,6 +928,9 @@
                     <span class="max-add-label">Adicionar perfil</span>
                 </div>
             </div>
+                        
+            <button id="homeEditBtn" class="home-edit-btn" onclick="window.startEditMode()">Editar Perfis</button>
+            
         </div>
 
         <div id="viewCreateProfile" class="max-view" style="display: none;">
@@ -1102,7 +1125,7 @@
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, query, where, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, arrayUnion, arrayRemove, query, where, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 
         // SUAS CHAVES (Já coloquei as suas aqui)
@@ -1168,6 +1191,11 @@
             window.isEditMode = false;
             renderMainScreen(); // Recarrega a tela no formato limpo
         };
+        // NOVO: Função que liga a edição pela tela inicial
+        window.startEditMode = function() {
+            window.isEditMode = true; // Liga o interruptor!
+            renderMainScreen(); // Manda desenhar a tela de novo (agora com os lápis)
+        };
 
         window.goToEditProfiles = function() {
             closeProfileMenu();
@@ -1196,18 +1224,35 @@
             // Alterna os visuais com base no modo
             document.getElementById('editProfilesHeader').style.display = window.isEditMode ? 'flex' : 'none';
             document.getElementById('whoIsWatchingTitle').style.display = window.isEditMode ? 'none' : 'block';
+            
+            // NOVO: Esconde o botão do canto direito se o modo de edição já estiver ligado
+            document.getElementById('homeEditBtn').style.display = window.isEditMode ? 'none' : 'block';
+
 
             allProfiles.forEach(profile => {
                 const card = document.createElement('div');
                 card.className = 'max-profile-card';
+                
+                // MÁGICA DO LÁPIS: Só aparece se o modo de edição estiver ativado e escurece a foto
+                let editBadge = '';
+                let imageStyle = '';
+                if (window.isEditMode) {
+                    editBadge = `<div class="profile-edit-overlay">✎</div>`;
+                    imageStyle = 'opacity: 0.5; border-color: #555;';
+                }
+
                 card.innerHTML = `
-                    <img src="${profile.avatar}" class="max-avatar-img">
+                    <div class="max-avatar-wrapper">
+                        <img src="${profile.avatar}" class="max-avatar-img" style="${imageStyle}">
+                        ${editBadge}
+                    </div>
                     <span class="max-profile-name">${profile.name}</span>
                 `;
                 
                 card.onclick = () => {
                     if (window.isEditMode) {
-                        alert(`No futuro, aqui abrirá a tela para alterar o nome ou foto de: ${profile.name}`);
+                        // CHAMA A TELA DE EDIÇÃO COM OS DADOS DO USUÁRIO
+                        window.openEditProfileView(profile);
                     } else {
                         // Login Normal
                         window.loggedUser = profile; 
@@ -1229,8 +1274,14 @@
         }
 
 
+        // --- VARIÁVEL GLOBAL PARA SABER SE ESTAMOS EDITANDO ---
+        window.editingProfileId = null;
+
         // --- FUNÇÕES DE NAVEGAÇÃO DE TELAS ---
         window.openCreateView = function() {
+            window.editingProfileId = null; // Avisa o sistema que é um perfil NOVO
+            document.querySelector('#viewCreateProfile h2').textContent = "Criar perfil";
+            
             document.getElementById('viewSelectProfiles').style.display = 'none';
             document.getElementById('viewCreateProfile').style.display = 'flex';
             
@@ -1241,7 +1292,30 @@
             document.getElementById('inputYear').value = '';
             document.getElementById('nameError').style.display = 'none';
             
-            currentChosenAvatar = maxAvatars[Math.floor(Math.random() * maxAvatars.length)]; // Pega um aleatório
+            currentChosenAvatar = maxAvatars[Math.floor(Math.random() * maxAvatars.length)]; 
+            document.getElementById('creationAvatarImg').src = currentChosenAvatar;
+        };
+
+        window.openEditProfileView = function(profile) {
+            window.editingProfileId = profile.id; // Avisa o sistema de QUEM estamos editando
+            document.querySelector('#viewCreateProfile h2').textContent = "Editar perfil";
+            
+            document.getElementById('viewSelectProfiles').style.display = 'none';
+            document.getElementById('viewCreateProfile').style.display = 'flex';
+            document.getElementById('nameError').style.display = 'none';
+            
+            // Preenche os campos com os dados antigos da pessoa
+            document.getElementById('maxInputName').value = profile.name;
+            if(profile.dob) {
+                const parts = profile.dob.split('/');
+                if(parts.length === 3) {
+                    document.getElementById('inputDay').value = parts[0];
+                    document.getElementById('inputMonth').value = parts[1];
+                    document.getElementById('inputYear').value = parts[2];
+                }
+            }
+            
+            currentChosenAvatar = profile.avatar;
             document.getElementById('creationAvatarImg').src = currentChosenAvatar;
         };
 
@@ -1274,7 +1348,7 @@
             document.getElementById('viewCreateProfile').style.display = 'flex';
         };
 
-        // --- SALVAR NO FIREBASE ---
+        // --- SALVAR NO FIREBASE (CRIAR OU ATUALIZAR) ---
         window.saveNewProfile = async function() {
             const name = document.getElementById('maxInputName').value.trim();
             const day = document.getElementById('inputDay').value;
@@ -1283,7 +1357,8 @@
 
             if (name === '') return;
 
-            const nameExists = allProfiles.some(p => p.name.toLowerCase() === name.toLowerCase());
+            // Verifica se o nome já existe (mas ignora se for o próprio perfil que está sendo editado)
+            const nameExists = allProfiles.some(p => p.name.toLowerCase() === name.toLowerCase() && p.id !== window.editingProfileId);
             if (nameExists) {
                 document.getElementById('nameError').style.display = 'block';
                 return; 
@@ -1292,16 +1367,45 @@
             const formattedDob = `${day}/${month}/${year}`;
 
             try {
-                await addDoc(collection(db, "profiles"), {
-                    name: name,
-                    dob: formattedDob,
-                    avatar: currentChosenAvatar
-                });
+                if (window.editingProfileId) {
+                    // === 1. ATUALIZA O PERFIL EXISTENTE ===
+                    await updateDoc(doc(db, "profiles", window.editingProfileId), {
+                        name: name,
+                        dob: formattedDob,
+                        avatar: currentChosenAvatar
+                    });
+
+                    // === 2. ATUALIZA TODOS OS COMENTÁRIOS DESTE USUÁRIO ===
+                    const q = query(collection(db, "reviews"), where("profileId", "==", window.editingProfileId));
+                    const querySnapshot = await getDocs(q);
+                    
+                    querySnapshot.forEach(async (reviewDoc) => {
+                        await updateDoc(doc(db, "reviews", reviewDoc.id), {
+                            authorName: name,
+                            avatar: currentChosenAvatar
+                        });
+                    });
+
+                    // === 3. ATUALIZA A FOTO NA BARRA INFERIOR (Se for você mesmo editando) ===
+                    if (window.loggedUser && window.loggedUser.id === window.editingProfileId) {
+                        document.getElementById('bottomProfileImg').src = currentChosenAvatar;
+                    }
+
+                } else {
+                    // === CRIA UM NOVO PERFIL DO ZERO ===
+                    await addDoc(collection(db, "profiles"), {
+                        name: name,
+                        dob: formattedDob,
+                        avatar: currentChosenAvatar
+                    });
+                }
+                
                 backToSelect(); 
             } catch (e) {
-                console.error("Erro:", e);
+                console.error("Erro ao salvar perfil:", e);
             }
         };
+
 
         // Botão visual "Pronto" (apenas estético por enquanto)
         window.enterEditMode = function() {
@@ -4070,7 +4174,7 @@
             <button class="modal-close" onclick="closeRoulette()" style="color: black;">×</button>
             <h2 class="roulette-title">Títulos Aleatórios</h2>
             <p style="text-align: center; color: #888; margin-bottom: 20px; font-size: 0.9rem;">Escolha uma categoria (ou várias) para o sorteio.</p>
-            
+            max-profile-card
             <div class="roulette-categories" id="rouletteCategoriesGrid">
                 </div>
             
