@@ -652,12 +652,76 @@ deleteDoc }<!DOCTYPE html>
         }
         
         /* MUDANÇAS PARA MELHORAR A VISUALIZAÇAO NO MOBILE */
+        .mobile-pills { display: none; }
+        .mobile-only-flex { display: none !important; }
+        
         @media (max-width: 767px) {
-            /* Aumentar os banners das coleções no mobile */
-            .collection-poster {
-                width: 70%; /* Os banners ocupam 70% da largura da tela no mobile */
-                aspect-ratio: 16/9; /* Mantém a proporção de paisagem */ 
-            } /* <-- FALTAVA ESSA CHAVE */
+            /* DESTRAVA O CABEÇALHO DO TOPO */
+            header {
+                position: absolute; 
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 4% 10px;
+                height: auto;
+                background: linear-gradient(to bottom, rgba(20,20,20,1) 70%, rgba(20,20,20,0) 100%);
+            }
+            .header-left { width: 100%; display: block; }
+            .logo { display: block; margin-bottom: 15px; }
+            
+            /* ESCONDE A BUSCA E ALEATÓRIO LÁ DE CIMA */
+            .header-right { display: none !important; } 
+            
+            .hero-carousel-wrapper { margin-top: 85px; } 
+            .collection-poster { width: 70%; aspect-ratio: 16/9; }
+
+            /* BOTÕES ESTILO PÍLULA */
+            .mobile-pills {
+                display: flex;
+                gap: 10px;
+                width: 100%;
+                overflow-x: auto;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+                padding-bottom: 5px;
+            }
+            .mobile-pills::-webkit-scrollbar { display: none; }
+            .mobile-pill-btn {
+                background: transparent;
+                border: 1px solid rgba(255,255,255,0.4);
+                color: white;
+                padding: 6px 16px;
+                border-radius: 30px;
+                font-size: 0.85rem;
+                font-family: inherit;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .mobile-pill-btn:active { background: rgba(255,255,255,0.2); }
+                        /* FIX DO MENU DE CATEGORIAS NO MOBILE */
+            .mobile-pills .dropdown-menu {
+                position: fixed !important;
+                top: 105px !important; /* Fica coladinho abaixo das pílulas */
+                left: 5% !important;
+                width: 90% !important;
+                max-height: 60vh;
+                overflow-y: auto;
+                border-radius: 12px;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+                border: 1px solid rgba(255,255,255,0.15);
+            }
+
+
+            /* AJUSTE DA BARRA INFERIOR */
+            .mobile-only-flex { display: flex !important; }
+            .bottom-nav-item { font-size: 0.65rem; }
+            .bottom-nav-icon { width: 22px; height: 22px; margin-bottom: 3px; }
+        }
+
+        /* BARRA DE PESQUISA DO CELULAR (OVERLAY) */
+        .mobile-search-bar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px; background: #141414; z-index: 3000; gap: 10px; align-items: center; border-bottom: 1px solid #333; }
+        .mobile-search-bar input { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 30px; outline: none; font-family: inherit;}
+        .mobile-search-bar button { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
+
         } /* <-- E FALTAVA ESSA CHAVE DO MOBILE */
                 
         /* ================================ */
@@ -985,36 +1049,51 @@ deleteDoc }<!DOCTYPE html>
         Voltar
     </button>
     <header>
-        <div class="header-left">
-            <a href="#" class="logo" onclick="resetSearch()">Stante</a>
-            <ul class="nav-menu">
-                <li><a onclick="resetSearch()">Início</a></li>
-                <li><a onclick="filterByType('Filme')">Filmes</a></li>
-                <li><a onclick="filterByType('Série')">Séries</a></li>
-                <li class="category-dropdown">
-                    <a onclick="toggleCategories(event)">Categorias ▾</a>
-                    <div id="categoryDropdown" class="dropdown-menu">
-                        <!-- Categories will be injected here -->
-                    </div>
-                </li>
-            </ul>
-        </div>
-        <div class="header-right">
-            <div class="random-container" id="randomContainer">
-                <div class="random-icon" onclick="toggleRandom()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.28l5.67-5.67"/></svg>
-                </div>
-                <input type="text" readonly class="random-input" value="Títulos Aleatórios" onclick="openRoulette()">
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+            <div class="header-left">
+                <a href="#" class="logo" onclick="resetSearch()">Stante</a>
+                <ul class="nav-menu">
+                    <li><a onclick="resetSearch()">Início</a></li>
+                    <li><a onclick="filterByType('Filme')">Filmes</a></li>
+                    <li><a onclick="filterByType('Série')">Séries</a></li>
+                    <li class="category-dropdown">
+                        <a onclick="toggleCategories(event)">Categorias ▾</a>
+                        <div class="dropdown-menu"></div>
+                    </li>
+                </ul>
             </div>
-
-            <div class="search-container" id="searchContainer">
-                <div class="search-icon" onclick="toggleSearch()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <div class="header-right">
+                <div class="random-container" id="randomContainer">
+                    <div class="random-icon" onclick="toggleRandom()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.28l5.67-5.67"/></svg>
+                    </div>
+                    <input type="text" readonly class="random-input" value="Títulos Aleatórios" onclick="openRoulette()">
                 </div>
-                <input type="text" id="searchInput" class="search-input" placeholder="Buscar títulos...">
+
+                <div class="search-container" id="searchContainer">
+                    <div class="search-icon" onclick="toggleSearch()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar títulos...">
+                </div>
+            </div>
+        </div>
+
+        <div class="mobile-pills">
+            <button class="mobile-pill-btn" onclick="filterByType('Filme')">Filmes</button>
+            <button class="mobile-pill-btn" onclick="filterByType('Série')">Séries</button>
+            <div class="category-dropdown" style="display: inline-block;">
+                <button class="mobile-pill-btn" onclick="toggleCategories(event)">Categorias ▾</button>
+                <div class="dropdown-menu" style="top: 120%; left: 0;"></div>
             </div>
         </div>
     </header>
+
+    <div id="mobileSearchBar" class="mobile-search-bar" style="display: none;">
+        <input type="text" id="mobileSearchInput" placeholder="Buscar títulos..." oninput="window.syncMobileSearch(event)">
+        <button onclick="window.closeMobileSearch()">×</button>
+    </div>
+
 
     <div class="hero-carousel-wrapper" id="heroCarouselWrapper">
         <section class="hero-carousel-track" id="heroCarousel">
@@ -1112,12 +1191,24 @@ deleteDoc }<!DOCTYPE html>
     </div>
 
     <div id="bottomNavBar" class="bottom-nav-bar">
+        <div class="bottom-nav-item" onclick="resetSearch(); window.scrollTo(0,0);">
+            <svg class="bottom-nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            <span>Início</span>
+        </div>
+        <div class="bottom-nav-item mobile-only-flex" onclick="window.openMobileSearch()">
+            <svg class="bottom-nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Pesquisar</span>
+        </div>
+        <div class="bottom-nav-item mobile-only-flex" onclick="openRoulette()">
+            <svg class="bottom-nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.28l5.67-5.67"/></svg>
+            <span>Aleatório</span>
+        </div>
         <div class="bottom-nav-item" onclick="openMyListScreen()">
-            <span class="bottom-nav-icon">+</span>
+            <span class="bottom-nav-icon" style="font-size: 1.5rem; line-height: 24px; height: 24px; font-weight: normal;">+</span>
             <span>Minha Lista</span>
         </div>
         <div class="bottom-nav-item" onclick="openProfileMenu()">
-            <img src="" id="bottomProfileImg" class="bottom-profile-img">
+            <img src="" id="bottomProfileImg" class="bottom-profile-img" style="width: 24px !important; height: 24px !important;">
             <span>Perfil</span>
         </div>
     </div>
@@ -3735,26 +3826,26 @@ deleteDoc }<!DOCTYPE html>
         });
 
         function setupCategoryDropdown() {
-            const dropdown = document.getElementById('categoryDropdown');
-            if (!dropdown) return;
+            const dropdowns = document.querySelectorAll('.dropdown-menu'); 
             
-            dropdown.innerHTML = ''; // Limpa antes de preencher
-            categories.forEach(category => {
-                const link = document.createElement('a');
-                link.href = '#';
-                link.textContent = category;
-                link.onclick = (e) => {
-                    e.preventDefault();
-                    filterByCategory(category);
-                    dropdown.classList.remove('active');
-                };
-                dropdown.appendChild(link);
+            dropdowns.forEach(dropdown => {
+                dropdown.innerHTML = ''; 
+                categories.forEach(category => {
+                    const link = document.createElement('a');
+                    link.href = '#';
+                    link.textContent = category;
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        filterByCategory(category);
+                        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('active'));
+                    };
+                    dropdown.appendChild(link);
+                });
             });
 
-            // Close dropdown when clicking outside
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.category-dropdown')) {
-                    dropdown.classList.remove('active');
+                    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('active'));
                 }
             });
         }
@@ -3762,8 +3853,33 @@ deleteDoc }<!DOCTYPE html>
         function toggleCategories(e) {
             e.preventDefault();
             e.stopPropagation();
-            document.getElementById('categoryDropdown').classList.toggle('active');
+            // Acha exatamente o menu de categorias abaixo de quem foi clicado
+            const dropdown = e.target.nextElementSibling;
+            if(dropdown) dropdown.classList.toggle('active');
         }
+
+        // --- SISTEMA DE PESQUISA EXCLUSIVO DO MOBILE ---
+        window.openMobileSearch = function() {
+            document.getElementById('mobileSearchBar').style.display = 'flex';
+            document.getElementById('mobileSearchInput').focus();
+        };
+
+        window.closeMobileSearch = function() {
+            document.getElementById('mobileSearchBar').style.display = 'none';
+            document.getElementById('mobileSearchInput').value = '';
+            
+            // Envia um "vazio" pra busca principal pra limpar a tela
+            const originalInput = document.getElementById('searchInput');
+            originalInput.value = '';
+            originalInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
+
+        window.syncMobileSearch = function(e) {
+            // Clona o que é digitado no celular para a caixa de pesquisa do cérebro
+            const originalInput = document.getElementById('searchInput');
+            originalInput.value = e.target.value;
+            originalInput.dispatchEvent(new Event('input', { bubbles: true }));
+        };
 
         function filterByCategory(category) {
             currentFilter = category;
@@ -4089,6 +4205,8 @@ deleteDoc }<!DOCTYPE html>
 
         function resetSearch() {
             currentFilter = null;
+            
+            if(document.getElementById('mobileSearchInput')) document.getElementById('mobileSearchInput').value = '';
             const searchInput = document.getElementById('searchInput');
             searchInput.value = '';
             document.getElementById('searchContainer').classList.remove('expanded');
