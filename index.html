@@ -277,6 +277,7 @@
         }
 
         .hero-content {
+           display: none;
             position: relative;
             z-index: 10;
             max-width: 600px;
@@ -2204,7 +2205,9 @@
                 cast: "Neve Campbell, Courteney Cox",
                 synopsis: "Um assassino mascarado aterroriza adolescentes em uma pequena cidade.",
                 location: "Prateleira 1, Fila B",
-                poster: "Pânico de 1996.jpeg"
+                poster: "Pânico de 1996.jpeg",
+                heroImage: "panico1horizontal.jpg",
+                heroImageMobile: "Pânico de 1996.jpeg",
             },
             {
                 id: 185,
@@ -2217,6 +2220,7 @@
                 synopsis: "Ghostface retorna durante as filmagens de um filme inspirado nos assassinatos anteriores.",
                 location: "Gaveta Studio Ghibli",
                 poster: "panico 3.jpg"
+                
             },
             {
                 id: 199,
@@ -2288,7 +2292,7 @@
                 cast: "Simon Pegg, Nick Frost",
                 synopsis: "Um homem comum tenta reconquistar a ex-namorada enquanto enfrenta um apocalipse zumbi.",
                 location: "Gaveta Studio Ghibli",
-                poster: "todo mundo quase morto.jpg"
+                poster: "todo mundo quase morto.jpg",
             },
             {
                 id: 106,
@@ -2300,7 +2304,9 @@
                 cast: "Anna Faris, Jon Abrahams",
                 synopsis: "Uma paródia de filmes de terror populares dos anos 90.",
                 location: "Gaveta 2",
-                poster: "todo mundo panico 1.jpeg"
+                poster: "todo mundo panico 1.jpeg",
+                heroImage: "estrada da furia.jpeg",
+                heroImageMobile: "estrada da furia_mobile.jpeg",
             },
             {
                 id: 169,
@@ -2663,7 +2669,9 @@
                 cast: "Daniel Craig, Javier Bardem",
                 synopsis: "A lealdade de Bond a M é testada quando seu passado volta para assombrá-la.",
                 location: "Prateleira 2, Fila A",
-                poster: "SKYFALL.jpeg"
+                poster: "SKYFALL.jpeg",
+                heroImage: "skyfall_horizontal.jpg",
+                heroImageMobile: "SKYFALL.jpeg",
             },
             {
                 id: 201,
@@ -3451,7 +3459,7 @@
                 synopsis: "Batman enfrenta o Coringa, um criminoso que busca mergulhar Gotham no caos.",
                 location: "Prateleira DC",
                 poster: "cavaleiro das trevas.jpg",
-                heroImage: "cavaleiro das trevas.jpg",
+                heroImage: "bamtan_cav_horizontal.jpg",
                 heroImageMobile: "cavaleiro das trevas.jpg",
                 featured: true
             },
@@ -3549,7 +3557,9 @@
                 cast: "Michael Fassbender, Katherine Waterston",
                 synopsis: "A tripulação de uma nave colonizadora descobre um planeta aparentemente perfeito que esconde uma ameaça alienígena mortal.",
                 location: "Gaveta Sci‑Fi",
-                poster: "alien covenant.jpg"
+                poster: "alien covenant.jpg",
+                heroImage: "Convenant_horizontal.jpg",
+                heroImageMobile: "alien covenant.jpg",
             },
             {
                 id: 225,
@@ -3645,7 +3655,9 @@
                 cast: "Mark Hamill, Harrison Ford",
                 synopsis: "Luke Skywalker se junta a um cavaleiro Jedi e um piloto para salvar a galáxia da Estrela da Morte.",
                 location: "Box Set Aventura",
-                poster: "uma nova esperança.jpg"
+                poster: "uma nova esperança.jpg",
+                heroImage: "star wars 4_horizontal.jpg",
+                heroImageMobile: "uma nova esperança.jpg",
             },
             {
                 id: 239,
@@ -4025,7 +4037,7 @@
         // CARROSSEL DISNEY+ (LOOP INFINITO) //
         // ================================ //
         function setupHeroCarousel() {
-            const carouselIds = [6, 114, 123, 10, 1, 138]; 
+            const carouselIds = [115, 231, 2, 123, 138, 10]; 
             
             carouselIds.forEach(id => {
                 const movie = movies.find(m => m.id === id);
