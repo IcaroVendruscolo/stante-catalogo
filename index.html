@@ -330,7 +330,7 @@
             font-size: 0.9rem;
             font-weight: bold;
             border: none;
-            border-radius: 4px;
+            border-radius: 9px;
             cursor: pointer;
             transition: all 0.2s;
             display: inline-flex;
@@ -339,13 +339,19 @@
         }
 
         .btn-primary {
-            background-color: var(--accent-color);
+            background-color: rgba(229, 9, 20, 0.5); 
             color: white;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+  /* Borda sutil para definir o botão */
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-primary:hover {
-            background-color: #f40612;
+            background-color: rgba(229, 9, 20, 0.4); /* Vermelho Netflix com 50% de transparência */
+  color: white; /* Texto permanece totalmente branco */
             transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.5); /* Borda acende um pouco */
         }
         /* Catalog */
         .catalog {
@@ -780,7 +786,6 @@
         .mobile-search-bar input { flex: 1; background: #222; border: 1px solid #444; color: white; padding: 10px 15px; border-radius: 30px; outline: none; font-family: inherit;}
         .mobile-search-bar button { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
 
-        } /* <-- E FALTAVA ESSA CHAVE DO MOBILE */
                 
         /* ================================ */
         /* TELA DE PERFIS ESTILO MAX (CORRIGIDO) */
@@ -845,6 +850,9 @@
         .max-form-group { margin-bottom: 20px; }
         .max-form-label { display: block; font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: #aaa;}
         .max-input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; color: white; padding: 15px; font-size: 1rem; box-sizing: border-box;}
+        .max-delete-btn { width: 100%; background: #e50914; border: none; border-radius: 6px; color: white; padding: 15px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .max-delete-btn:hover { background: #b20710; }
+
         .date-inputs { display: flex; gap: 10px; }
         .date-inputs input { text-align: center; }
 
@@ -862,7 +870,7 @@
         }
         .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: #888; text-decoration: none; cursor: pointer; font-size: 0.8rem; gap: 5px;}
         .bottom-nav-item:hover { color: white; }
-        .bottom-nav-icon { font-size: 1.5rem; font-weight: bold;}
+        .bottom-nav-icon { width: 24px; height: 24px; font-weight: bold; }
         .bottom-profile-img { width: 30px !important; height: 30px !important; border-radius: 50% !important; object-fit: cover !important; border: 1px solid #888;}
         .bottom-nav-item:hover .bottom-profile-img { border-color: white; }
 
@@ -1083,9 +1091,13 @@
                             <input type="text" id="inputYear" class="max-input" placeholder="AAAA" maxlength="4">
                         </div>
                     </div>
+                    
+                    <button id="deleteProfileBtn" class="max-delete-btn" style="display: none;" onclick="window.deleteCurrentProfile()">Deletar Perfil</button>
+                    
                 </div>
             </div>
         </div>
+
 
         <div id="viewChooseAvatar" class="max-view" style="display: none;">
             <div class="max-header">
@@ -1441,6 +1453,8 @@
             document.getElementById('inputMonth').value = '';
             document.getElementById('inputYear').value = '';
             document.getElementById('nameError').style.display = 'none';
+            document.getElementById('deleteProfileBtn').style.display = 'none';
+
             
             currentChosenAvatar = maxAvatars[Math.floor(Math.random() * maxAvatars.length)]; 
             document.getElementById('creationAvatarImg').src = currentChosenAvatar;
@@ -1453,6 +1467,8 @@
             document.getElementById('viewSelectProfiles').style.display = 'none';
             document.getElementById('viewCreateProfile').style.display = 'flex';
             document.getElementById('nameError').style.display = 'none';
+            document.getElementById('deleteProfileBtn').style.display = 'block';
+
             
             // Preenche os campos com os dados antigos da pessoa
             document.getElementById('maxInputName').value = profile.name;
@@ -1555,7 +1571,42 @@
                 console.error("Erro ao salvar perfil:", e);
             }
         };
+        // --- DELETAR PERFIL E SEU HISTÓRICO ---
+        window.deleteCurrentProfile = async function() {
+            if (!window.editingProfileId) return;
+            
+            // Pergunta de segurança para não deletar sem querer
+            if (confirm("Tem certeza que deseja excluir este perfil? TODOS os comentários e a lista salvos por ele serão apagados para sempre.")) {
+                try {
+                    // 1. FAXINA: Acha e deleta TODOS os comentários feitos por essa pessoa
+                    const q = query(collection(db, "reviews"), where("profileId", "==", window.editingProfileId));
+                    const querySnapshot = await getDocs(q);
+                    
+                    querySnapshot.forEach(async (reviewDoc) => {
+                        await deleteDoc(doc(db, "reviews", reviewDoc.id));
+                    });
 
+                    // 2. Deleta o perfil em si
+                    await deleteDoc(doc(db, "profiles", window.editingProfileId));
+
+                    // 3. Se a pessoa estiver apagando o próprio perfil logado, desloga ela
+                    if (window.loggedUser && window.loggedUser.id === window.editingProfileId) {
+                        window.loggedUser = null;
+                        document.querySelector('header').style.display = 'none';
+                        document.getElementById('heroCarouselWrapper').style.display = 'none';
+                        document.getElementById('catalog').style.display = 'none';
+                        document.getElementById('bottomNavBar').style.display = 'none';
+                        window.isEditMode = false;
+                    }
+
+                    // Volta para a tela de seleção de avatares
+                    backToSelect();
+                } catch (e) {
+                    console.error("Erro ao deletar perfil: ", e);
+                    alert("Ocorreu um erro ao tentar deletar o perfil.");
+                }
+            }
+        };
 
         // Botão visual "Pronto" (apenas estético por enquanto)
         window.enterEditMode = function() {
