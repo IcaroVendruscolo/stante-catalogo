@@ -1,0 +1,17 @@
+{
+  "name": "Stante - Catálogo Pessoal",
+  "short_name": "Stante",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#141414",
+  "theme_color": "#E50914",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icone-app.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
