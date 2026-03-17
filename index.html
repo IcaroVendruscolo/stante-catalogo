@@ -213,9 +213,15 @@
         /* O "Trilho" onde os cards ficam enfileirados */
         .hero-carousel-track {
             display: flex;
-            gap: 20px; /* Distância entre um cartão e outro */
+            gap: 10px; /* Distância entre um cartão e outro */
             transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); /* Deslize bem fluido */
+                    /* O "Trilho" onde os cards ficam enfileirados */
+            
+            /* ===== NOVO ===== */
+            user-select: none; /* Impede que o texto ou imagem sejam selecionados ao arrastar */
         }
+
+
 
         /* O Cartão Individual do Filme */
         .hero-slide {
@@ -4039,12 +4045,26 @@
             
             renderCatalog(filtered);
         }        
-        // ================================ //
-        // CARROSSEL DISNEY+ (LOOP INFINITO) //
-        // ================================ //
+        // =========================================== //
+        // NOVO: CARROSSEL ARRASTÁVEL & AUTOMÁTICO (5s) //
+        // =========================================== //
         function setupHeroCarousel() {
-            const carouselIds = [115, 231, 2, 123, 138, 10]; 
+            const carouselIds = [115, 231, 2, 123, 138, 10];
+            const carouselEl = document.getElementById('heroCarousel');
+            const dotsEl = document.getElementById('carouselDots');
+            const wrapper = document.getElementById('heroCarouselWrapper');
             
+            // Variáveis de controle de estado
+            let isDragging = false;
+            let startPos = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+            let animationID = 0;
+            let currentIndex = 0;
+            let autoSlideInterval;
+
+            // Popula o carrossel (mesma lógica)
+            heroMovies.length = 0; // Limpa o array anterior
             carouselIds.forEach(id => {
                 const movie = movies.find(m => m.id === id);
                 if (movie) {
@@ -4054,12 +4074,11 @@
                 }
             });
 
-            const carouselEl = document.getElementById('heroCarousel');
-            const dotsEl = document.getElementById('carouselDots');
             carouselEl.innerHTML = '';
             dotsEl.innerHTML = '';
 
-            const createSlideHTML = (movie, index) => {
+            // Cria o HTML dos slides (mesma lógica)
+            heroMovies.forEach((movie, index) => {
                 const slide = document.createElement('div');
                 slide.className = `hero-slide ${index === 0 ? 'active' : ''}`;
                 slide.style.setProperty('--bg-desktop', `url("${movie.heroImage}")`);
@@ -4071,17 +4090,8 @@
                         <button class="btn btn-primary" onclick='window.openModalById(${movie.id}, event)'>Mais Informações</button>
                     </div>
                 `;
-                slide.onclick = (e) => {
-                    if (e.target.tagName !== 'BUTTON' && index !== currentSlideIndex && index < heroMovies.length) {
-                        e.preventDefault(); 
-                        goToSlide(index);
-                    }
-                };
-                return slide;
-            };
-
-            heroMovies.forEach((movie, index) => {
-                carouselEl.appendChild(createSlideHTML(movie, index));
+                // Ao invés de clique direto, vamos usar os eventos de arrastar
+                carouselEl.appendChild(slide);
 
                 const dot = document.createElement('div');
                 dot.className = `dot ${index === 0 ? 'active' : ''}`;
@@ -4089,88 +4099,141 @@
                 dotsEl.appendChild(dot);
             });
 
-            // Clona o primeiro e joga no fim
+            // Clona o primeiro e joga no fim para o loop (mesma lógica)
             if (heroMovies.length > 0) {
-                const cloneSlide = createSlideHTML(heroMovies[0], heroMovies.length);
+                const cloneSlide = carouselEl.firstElementChild.cloneNode(true);
                 cloneSlide.classList.remove('active');
                 carouselEl.appendChild(cloneSlide);
             }
 
-            window.addEventListener('resize', updateCarouselPosition);
-            setTimeout(updateCarouselPosition, 100);
-            startCarousel();
-        }
+            // ===== LÓGICA DE ARRASTAR =====
 
-        window.openModalById = function(id, event) {
-            if (event) event.stopPropagation(); 
-            const movie = window.movies.find(m => m.id === id);
-            if (movie) window.openModal(movie);
-        }
-
-        function updateCarouselPosition() {
-            const track = document.getElementById('heroCarousel');
-            const slides = document.querySelectorAll('.hero-slide');
-            const dots = document.querySelectorAll('.dot');
-            if (slides.length === 0) return;
-
-            slides.forEach((slide, index) => {
-                slide.classList.remove('active');
-                if (index === currentSlideIndex) slide.classList.add('active');
-            });
-
-            const realDotIndex = currentSlideIndex >= dots.length ? 0 : currentSlideIndex;
-            dots.forEach((dot, index) => {
-                dot.classList.remove('active');
-                if (index === realDotIndex) dot.classList.add('active');
-            });
-
-            const activeSlide = slides[currentSlideIndex];
-            const wrapper = document.getElementById('heroCarouselWrapper');
-            const offsetLeft = activeSlide.offsetLeft;
-            const centerOffset = (wrapper.clientWidth - activeSlide.offsetWidth) / 2;
-            const finalPosition = offsetLeft - centerOffset;
-
-            track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
-            track.style.transform = `translateX(-${finalPosition}px)`;
-
-            // Volta invisível se bater no clone
-            if (currentSlideIndex === slides.length - 1) {
-                setTimeout(() => {
-                    track.style.transition = 'none'; 
-                    currentSlideIndex = 0; 
-                    
-                    const realFirst = slides[0];
-                    const realOffset = realFirst.offsetLeft - centerOffset;
-                    track.style.transform = `translateX(-${realOffset}px)`;
-                    
-                    slides[slides.length - 1].classList.remove('active');
-                    slides[0].classList.add('active');
-                    
-                    // Força o navegador a renderizar o pulo invisível
-                    void track.offsetWidth; 
-                }, 600); 
+            // Funções Auxiliares
+            function getPositionX(event) {
+                return event.type.includes('mouse') ? event.pageX : event.touches[0].clientX;
             }
+
+            function setCarouselPosition() {
+                carouselEl.style.transition = 'none'; // Desliga a animação padrão do CSS enquanto arrasta
+                carouselEl.style.transform = `translateX(${currentTranslate}px)`;
+            }
+
+            function animation() {
+                setCarouselPosition();
+                if (isDragging) requestAnimationFrame(animation);
+            }
+
+            function goToSlide(index, withAnimation = true) {
+                const slides = document.querySelectorAll('.hero-slide');
+                const dots = document.querySelectorAll('.dot');
+                if (slides.length === 0) return;
+
+                currentIndex = index;
+
+                // Atualiza o estado visual (classes active)
+                slides.forEach((slide, idx) => {
+                    slide.classList.remove('active');
+                    if (idx === currentIndex) slide.classList.add('active');
+                });
+
+                const realDotIndex = currentIndex >= dots.length ? 0 : currentIndex;
+                dots.forEach((dot, idx) => {
+                    dot.classList.remove('active');
+                    if (idx === realDotIndex) dot.classList.add('active');
+                });
+
+                // Calcula a nova posição
+                const activeSlide = slides[currentIndex];
+                const offsetLeft = activeSlide.offsetLeft;
+                const centerOffset = (wrapper.clientWidth - activeSlide.offsetWidth) / 2;
+                currentTranslate = -(offsetLeft - centerOffset);
+                prevTranslate = currentTranslate;
+
+                // Aplica a posição com ou sem animação
+                if (withAnimation) {
+                    carouselEl.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+                    carouselEl.style.transform = `translateX(${currentTranslate}px)`;
+                } else {
+                    carouselEl.style.transition = 'none';
+                    carouselEl.style.transform = `translateX(${currentTranslate}px)`;
+                }
+
+                // Lógica do loop infinito
+                if (currentIndex === slides.length - 1) {
+                    setTimeout(() => {
+                        goToSlide(0, false); // Pula de volta para o primeiro sem animação
+                    }, 600);
+                }
+
+                startCarousel(); // Reseta o temporizador de 5s toda vez que mudar de slide
+            }
+
+            function nextSlide() {
+                const slides = document.querySelectorAll('.hero-slide');
+                if (slides.length <= 1) return;
+                goToSlide(currentIndex + 1);
+            }
+
+            function startCarousel() {
+                if (autoSlideInterval) clearInterval(autoSlideInterval);
+                autoSlideInterval = setInterval(nextSlide, 5000); // 5 segundos
+            }
+
+            // ===== EVENTOS DO MOUSE/TOQUE =====
+
+            function dragStart(event) {
+                isDragging = true;
+                startPos = getPositionX(event);
+                animationID = requestAnimationFrame(animation);
+                carouselEl.style.cursor = 'grabbing';
+                if (autoSlideInterval) clearInterval(autoSlideInterval); // Pausa o auto-slide enquanto arrasta
+            }
+
+            function dragMove(event) {
+                if (!isDragging) return;
+                const currentPosition = getPositionX(event);
+                currentTranslate = prevTranslate + (currentPosition - startPos);
+            }
+
+            function dragEnd() {
+                isDragging = false;
+                cancelAnimationFrame(animationID);
+                carouselEl.style.cursor = 'grab';
+
+                // Calcula o quanto o usuário arrastou (em px)
+                const movedBy = currentTranslate - prevTranslate;
+
+                // Se o movimento foi maior que 100px para a esquerda, vai pro próximo
+                if (movedBy < -100 && currentIndex < heroMovies.length) {
+                    goToSlide(currentIndex + 1);
+                }
+                // Se o movimento foi maior que 100px para a direita, vai pro anterior
+                else if (movedBy > 100 && currentIndex > 0) {
+                    goToSlide(currentIndex - 1);
+                }
+                // Se não arrastou o suficiente, volta para o slide atual (snap back)
+                else {
+                    goToSlide(currentIndex);
+                }
+            }
+
+            // Escuta os eventos no próprio trilho
+            // Mouse
+            carouselEl.addEventListener('mousedown', dragStart);
+            carouselEl.addEventListener('mousemove', dragMove);
+            carouselEl.addEventListener('mouseleave', dragEnd); // Se o mouse sair do carrossel, termina o drag
+            window.addEventListener('mouseup', dragEnd); // Garante que termine mesmo se soltar fora
+
+            // Touch
+            carouselEl.addEventListener('touchstart', dragStart);
+            carouselEl.addEventListener('touchmove', dragMove);
+            carouselEl.addEventListener('touchend', dragEnd);
+
+            // Inicializa a posição e o auto-slide
+            window.addEventListener('resize', () => goToSlide(currentIndex, false)); // Ajusta sem animação no resize
+            setTimeout(() => goToSlide(0, false), 100); // Força a primeira posição sem animação
         }
 
-        function goToSlide(index) {
-            if (index === currentSlideIndex || currentSlideIndex === heroMovies.length) return;
-            currentSlideIndex = index;
-            updateCarouselPosition();
-            startCarousel(); 
-        }
-
-        function nextSlide() {
-            const slides = document.querySelectorAll('.hero-slide');
-            if (slides.length <= 1) return;
-            
-            currentSlideIndex++;
-            updateCarouselPosition();
-        }
-
-        function startCarousel() {
-            if (carouselInterval) clearInterval(carouselInterval);
-            carouselInterval = setInterval(nextSlide, 5000); 
-        }
 
 
         function renderCatalog(filteredMovies = movies) {
