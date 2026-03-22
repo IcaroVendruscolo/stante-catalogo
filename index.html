@@ -840,6 +840,18 @@
             .collection-poster { width: 350px; }
         }
 
+        /* Tarja cinza atrás das coleções */
+        .collections-row {
+            margin: 0 4% 28px;
+            background: #3a3838;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .collections-row .row-posters {
+            padding: 18px 20px;
+            gap: 12px;
+        }
+
         /* Collection View */
         .collection-view {
             display: none;
@@ -4204,7 +4216,6 @@
                 poster: "cavaleiro das trevas.jpg",
                 heroImage: "bamtan_cav_horizontal.jpg",
                 heroImageMobile: "cavaleiro das trevas.jpg",
-				trailer: "https://youtu.be/ppOVLojanC8?si=cHcAPnCb_DLtiR5u",
                 featured: true
             },
             {
@@ -6482,7 +6493,7 @@
 
                 // Coleções
                 const collRow = document.createElement('div');
-                collRow.className = 'row';
+                collRow.className = 'row collections-row';
                 const collContainer = document.createElement('div');
                 collContainer.className = 'row-posters';
                 collections.forEach(coll => {
