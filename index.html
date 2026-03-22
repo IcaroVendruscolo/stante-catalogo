@@ -2124,6 +2124,27 @@
             window.resetSearch(); // Volta para o início
         };
 
+        // ASSISTIDO — salva no Firebase igual à Minha Lista
+        window.toggleWatched = async function(movieId, wrapperEl, btnEl) {
+            if (!window.loggedUser) return;
+            const profileRef = doc(db, "profiles", window.loggedUser.id);
+            const watchedArray = window.loggedUser.watched || [];
+
+            if (watchedArray.includes(movieId)) {
+                await updateDoc(profileRef, { watched: arrayRemove(movieId) });
+                window.loggedUser.watched = watchedArray.filter(id => id !== movieId);
+                wrapperEl.classList.remove('is-watched');
+                btnEl.classList.remove('watched');
+                btnEl.title = 'Marcar como assistido';
+            } else {
+                await updateDoc(profileRef, { watched: arrayUnion(movieId) });
+                window.loggedUser.watched = [...watchedArray, movieId];
+                wrapperEl.classList.add('is-watched');
+                btnEl.classList.add('watched');
+                btnEl.title = 'Marcar como não assistido';
+            }
+        };
+
         // 3. LÓGICA DO LETTERBOXD (Avaliações ao vivo)
         window.openModal = function(movie) {
             currentOpenMovieId = movie.id;
@@ -6089,26 +6110,6 @@
         // =========================================== //
         // ASSISTIDO — toggle + tela                   //
         // =========================================== //
-        window.toggleWatched = async function(movieId, wrapperEl, btnEl) {
-            if (!window.loggedUser) return;
-            const profileRef = doc(db, "profiles", window.loggedUser.id);
-            const watchedArray = window.loggedUser.watched || [];
-
-            if (watchedArray.includes(movieId)) {
-                await updateDoc(profileRef, { watched: arrayRemove(movieId) });
-                window.loggedUser.watched = watchedArray.filter(id => id !== movieId);
-                wrapperEl.classList.remove('is-watched');
-                btnEl.classList.remove('watched');
-                btnEl.title = 'Marcar como assistido';
-            } else {
-                await updateDoc(profileRef, { watched: arrayUnion(movieId) });
-                window.loggedUser.watched = [...watchedArray, movieId];
-                wrapperEl.classList.add('is-watched');
-                btnEl.classList.add('watched');
-                btnEl.title = 'Marcar como não assistido';
-            }
-        };
-
         window.openWatchedScreen = function() {
             closeProfileMenu();
             document.getElementById('heroCarouselWrapper').style.display = 'none';
