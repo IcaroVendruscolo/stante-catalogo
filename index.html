@@ -399,28 +399,229 @@
             display: none;
         }
 
+        /* poster dentro do wrapper — o hover é controlado pelo wrapper */
         .poster {
-            flex: 0 0 auto;
-            width: 150px;
             border-radius: 4px;
             cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
             object-fit: cover;
             aspect-ratio: 2/3;
             background-color: var(--card-bg);
+            display: block;
+            width: 100%;
         }
 
-        .poster:hover {
+        /* hover direto no poster (sem wrapper — busca por texto) */
+        .search-grid > .poster:hover,
+        .row-posters > .poster:hover {
             transform: scale(1.1);
             z-index: 2;
             box-shadow: 0 10px 20px rgba(0,0,0,0.8);
         }
 
+        /* ================================ */
+        /* POSTER WRAPPER + ASSISTIDO       */
+        /* ================================ */
+        .poster-wrapper {
+            flex: 0 0 auto;
+            width: 150px;
+            position: relative;
+            border-radius: 4px;
+        }
+        @media (min-width: 768px) { .poster-wrapper { width: 200px; } }
+
+        .poster-wrapper:hover .poster {
+            transform: scale(1.1);
+            z-index: 2;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+        }
+        .poster-wrapper.is-watched .poster {
+            filter: brightness(0.4) saturate(0.2);
+        }
+
+        .watched-btn {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+        .poster-wrapper:hover .watched-btn { opacity: 1; }
+        .watched-btn.watched {
+            opacity: 1 !important;
+            background: rgba(39,174,96,0.9);
+            border-color: #2ecc71;
+            color: white;
+        }
+
+        /* ================================ */
+        /* BOTÃO VIEW TOGGLE (Grade/Lista)  */
+        /* ================================ */
+        .view-toggle-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(25,25,25,0.92);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: white;
+            font-size: 17px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 900;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: background 0.2s, transform 0.15s;
+        }
+        .view-toggle-btn:hover { background: rgba(60,60,60,0.95); transform: scale(1.08); }
+        .view-toggle-btn.visible { display: flex; }
+        @media (max-width: 767px) { .view-toggle-btn { bottom: 130px; right: 14px; } }
+
+        /* Modo grade: row-posters vira grid */
+        .catalog.grid-mode .row-posters {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 5px 4% 16px;
+            overflow-x: visible;
+        }
         @media (min-width: 768px) {
-            .poster {
-                width: 200px;
+            .catalog.grid-mode .row-posters {
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
             }
         }
+        .catalog.grid-mode .poster-wrapper { width: 100%; }
+        .catalog.grid-mode .poster-wrapper:hover .poster { transform: scale(1.03) !important; }
+
+        /* ================================ */
+        /* PÁGINA DE ESTATÍSTICAS           */
+        /* ================================ */
+        .stats-view {
+            display: none;
+            min-height: 100vh;
+            background: var(--bg-color);
+            padding: 100px 4% 120px;
+        }
+        .stats-view.visible { display: block; }
+
+        @media (max-width: 767px) {
+            .stats-view { padding-top: 140px; }
+        }
+
+        .stats-header { margin-bottom: 36px; }
+        .stats-header h1 {
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .stats-header p { color: #666; font-size: 0.88rem; margin-top: 5px; }
+
+        .stats-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 36px;
+        }
+        @media (min-width: 600px) { .stats-kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .stat-kpi {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .stat-kpi-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+        .stat-kpi-label {
+            font-size: 0.75rem;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stats-section-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 14px;
+            margin-top: 34px;
+        }
+
+        .stats-bar-list { display: flex; flex-direction: column; gap: 10px; }
+        .stats-bar-item { display: flex; align-items: center; gap: 10px; }
+        .stats-bar-name {
+            font-size: 0.82rem;
+            color: #bbb;
+            width: 150px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .stats-bar-track {
+            flex: 1;
+            height: 5px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .stats-bar-fill {
+            height: 100%;
+            background: var(--accent-color);
+            border-radius: 10px;
+            width: 0;
+            transition: width 1s cubic-bezier(0.25,1,0.5,1);
+        }
+        .stats-bar-count {
+            font-size: 0.78rem;
+            color: #555;
+            width: 26px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .decade-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .decade-chip {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 0.83rem;
+            color: #aaa;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .decade-chip strong { color: white; }
 
         /* Modal */
         .modal-overlay {
@@ -1186,6 +1387,7 @@
                         <a onclick="toggleCategories(event)">Categorias ▾</a>
                         <div class="dropdown-menu"></div>
                     </li>
+                    <li id="statsNavItem"><a onclick="openStatsView()">Estatísticas</a></li>
                 </ul>
             </div>
             <div class="header-right">
@@ -1212,6 +1414,7 @@
                 <button class="mobile-pill-btn" onclick="toggleCategories(event)">Categorias ▾</button>
                 <div class="dropdown-menu" style="top: 120%; left: 0;"></div>
             </div>
+            <button id="statsMobilePill" class="mobile-pill-btn" onclick="openStatsView()">📊 Stats</button>
         </div>
     </header>
 
@@ -1247,6 +1450,26 @@
             <h1 id="collectionTitle" class="collection-title"></h1>
         </div>
         <div id="collectionGrid" class="search-grid" style="display: grid;"></div>
+    </div>
+
+    <!-- BOTÃO TOGGLE GRADE/CARROSSEL -->
+    <button id="viewToggleBtn" class="view-toggle-btn" onclick="toggleViewMode()" title="Alternar modo de exibição">
+        <svg id="viewToggleIcon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    </button>
+
+    <!-- PÁGINA DE ESTATÍSTICAS -->
+    <div id="statsView" class="stats-view">
+        <div class="stats-header">
+            <h1>Sua Coleção em Números</h1>
+            <p id="statsSubtitle">Carregando...</p>
+        </div>
+        <div id="statsKpiGrid" class="stats-kpi-grid"></div>
+
+        <p class="stats-section-title">Por Categoria</p>
+        <div id="statsCategoryBars" class="stats-bar-list"></div>
+
+        <p class="stats-section-title">Por Década</p>
+        <div id="statsDecadeChips" class="decade-chips"></div>
     </div>
 
     <div id="modal" class="modal-overlay">
@@ -1311,6 +1534,14 @@
         <button class="back-button" onclick="closeMyListScreen()">Voltar</button>
     </div>
 
+    <div id="watchedView" class="collection-view">
+        <div class="collection-title-container" style="margin-top: 80px;">
+            <h1 class="collection-title">✅ Assistidos</h1>
+        </div>
+        <div id="watchedGrid" class="search-grid" style="display: grid; padding: 0 4% 100px;"></div>
+        <button class="back-button" onclick="closeWatchedScreen()">Voltar</button>
+    </div>
+
     <div id="profileMenu" class="profile-menu-overlay" style="display: none;">
         <div class="profile-menu-content">
             <h3 style="color: #888; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase;">Trocar de Perfil</h3>
@@ -1320,6 +1551,7 @@
             
             <button class="profile-menu-btn" onclick="goToEditProfiles()">Editar Perfis</button>
             <button class="profile-menu-btn" onclick="openMyListScreen()">Minha Lista</button>
+            <button class="profile-menu-btn" onclick="openWatchedScreen()">✅ Assistidos</button>
             <button class="profile-menu-btn" onclick="closeProfileMenu()" style="color: #888;">Fechar Menu</button>
         </div>
     </div>
@@ -5526,14 +5758,11 @@
 
         function filterByCategory(category) {
             currentFilter = category;
-            // Verifica se a categoria está na string ou dentro do array de categorias do filme
             const filtered = movies.filter(m => 
                 Array.isArray(m.category) ? m.category.includes(category) : m.category === category
             );
-            
             currentFilteredMovies = filtered;
             currentSortOrder = 'default';
-
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
@@ -5541,7 +5770,7 @@
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
             showSortControls(false);
-            
+            showViewToggle(true);
             renderCatalog(filtered);
         }        
         // =========================================== //
@@ -5735,12 +5964,47 @@
 
 
 
+        // =========================================== //
+        // HELPER: cria um poster-wrapper com botão    //
+        // de "Assistido" integrado                    //
+        // =========================================== //
+        function createPosterWrapper(movie) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'poster-wrapper';
+            wrapper.dataset.movieId = movie.id;
+
+            const watchedList = window.loggedUser?.watched || [];
+            const isWatched = watchedList.includes(movie.id);
+            if (isWatched) wrapper.classList.add('is-watched');
+
+            const img = document.createElement('img');
+            img.className = 'poster';
+            img.src = movie.poster;
+            img.alt = movie.title;
+            img.loading = 'lazy';
+            img.referrerPolicy = 'no-referrer';
+            img.onclick = () => openModal(movie);
+
+            const btn = document.createElement('button');
+            btn.className = 'watched-btn' + (isWatched ? ' watched' : '');
+            btn.title = isWatched ? 'Marcar como não assistido' : 'Marcar como assistido';
+            btn.innerHTML = '✓';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                window.toggleWatched(movie.id, wrapper, btn);
+            };
+
+            wrapper.appendChild(img);
+            wrapper.appendChild(btn);
+            return wrapper;
+        }
+
         function renderCatalog(filteredMovies = movies) {
             const catalogEl = document.getElementById('catalog');
             if (!catalogEl) return;
             catalogEl.innerHTML = '';
 
-            // Se há filtro ativo (categoria ou tipo), injeta o seletor DENTRO do catalog
+            // Injeta ordenação inline quando há filtro ativo
             if (currentFilter) {
                 const sortHTML = `
                     <div id="sortControlsInline" class="sort-controls visible" style="margin: 10px 4% 18px;">
@@ -5752,43 +6016,30 @@
                         </select>
                     </div>`;
                 catalogEl.insertAdjacentHTML('beforeend', sortHTML);
-                // Esconde o sortControls fixo (usado só na busca por texto)
                 document.getElementById('sortControls').classList.remove('visible');
             }
             
-            // Only show Destaques and Collections on the main view (no filter active)
             if (!currentFilter && filteredMovies === movies) {
-                // 1. Destaques
+                // Destaques
                 const featuredMovies = movies.filter(m => m.featured);
                 if (featuredMovies.length > 0) {
                     const row = document.createElement('div');
                     row.className = 'row';
                     row.innerHTML = `<h2 class="row-title">Destaques</h2>`;
-                    
                     const postersContainer = document.createElement('div');
                     postersContainer.className = 'row-posters';
-                    
                     featuredMovies.forEach(movie => {
-                        const img = document.createElement('img');
-                        img.className = 'poster';
-                        img.src = movie.poster;
-                        img.alt = movie.title;
-                        img.onclick = () => openModal(movie);
-                        postersContainer.appendChild(img);
+                        postersContainer.appendChild(createPosterWrapper(movie));
                     });
-                    
                     row.appendChild(postersContainer);
                     catalogEl.appendChild(row);
                 }
 
-                // 2. Coleções
+                // Coleções
                 const collRow = document.createElement('div');
                 collRow.className = 'row';
-                // User said: "Essas coleçoes nao serao categorias em si, ou seja, nao terao um titulo como: Coleçoes"
-                
                 const collContainer = document.createElement('div');
                 collContainer.className = 'row-posters';
-                
                 collections.forEach(coll => {
                     const img = document.createElement('img');
                     img.className = 'collection-poster';
@@ -5797,58 +6048,243 @@
                     img.onclick = () => openCollectionView(coll);
                     collContainer.appendChild(img);
                 });
-                
                 collRow.appendChild(collContainer);
                 catalogEl.appendChild(collRow);
             }
 
-            // 3. Categorias
+            // Categorias
             categories.forEach(category => {
                 const isCategoryFilter = currentFilter && categories.includes(currentFilter);
-                if (isCategoryFilter && category !== currentFilter) {
-                    return;
-                }
+                if (isCategoryFilter && category !== currentFilter) return;
 
                 const categoryMovies = filteredMovies.filter(m => 
                     Array.isArray(m.category) ? m.category.includes(category) : m.category === category
                 );
-
                 if (categoryMovies.length === 0) return;
                 
                 const row = document.createElement('div');
                 row.className = 'row';
-                
                 if (!isCategoryFilter) {
                     row.innerHTML = `<h2 class="row-title">${category}</h2>`;
                 }
 
-                // CORREÇÃO AQUI: Criando um novo container para a categoria atual
                 const categoryPostersContainer = document.createElement('div');
-               
-                // A MÁGICA DA GRADE: Se for um filtro de categoria, vira grade. Se for tela inicial, vira carrossel.
                 if (isCategoryFilter) {
                     categoryPostersContainer.className = 'search-grid';
                     categoryPostersContainer.style.display = 'grid';
-                    categoryPostersContainer.style.paddingTop = '20px'; // Dá um respiro do título
+                    categoryPostersContainer.style.paddingTop = '20px';
                 } else {
                     categoryPostersContainer.className = 'row-posters';
                 }
 
                 categoryMovies.forEach(movie => {
-                    const img = document.createElement('img');
-                    img.className = 'poster';
-                    img.src = movie.poster;
-                    img.alt = movie.title;
-                    img.loading = 'lazy';
-                    img.referrerPolicy = 'no-referrer';
-                    img.onclick = () => openModal(movie);
-                    categoryPostersContainer.appendChild(img);
+                    categoryPostersContainer.appendChild(createPosterWrapper(movie));
                 });
                 
                 row.appendChild(categoryPostersContainer);
                 catalogEl.appendChild(row);
             });
         }
+
+        // =========================================== //
+        // ASSISTIDO — toggle + tela                   //
+        // =========================================== //
+        window.toggleWatched = async function(movieId, wrapperEl, btnEl) {
+            if (!window.loggedUser) return;
+            const profileRef = doc(db, "profiles", window.loggedUser.id);
+            const watchedArray = window.loggedUser.watched || [];
+
+            if (watchedArray.includes(movieId)) {
+                await updateDoc(profileRef, { watched: arrayRemove(movieId) });
+                window.loggedUser.watched = watchedArray.filter(id => id !== movieId);
+                wrapperEl.classList.remove('is-watched');
+                btnEl.classList.remove('watched');
+                btnEl.title = 'Marcar como assistido';
+            } else {
+                await updateDoc(profileRef, { watched: arrayUnion(movieId) });
+                window.loggedUser.watched = [...watchedArray, movieId];
+                wrapperEl.classList.add('is-watched');
+                btnEl.classList.add('watched');
+                btnEl.title = 'Marcar como não assistido';
+            }
+        };
+
+        window.openWatchedScreen = function() {
+            closeProfileMenu();
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'none';
+            document.getElementById('searchGrid').style.display = 'none';
+
+            const view = document.getElementById('watchedView');
+            const grid = document.getElementById('watchedGrid');
+            grid.innerHTML = '';
+
+            const watchedArray = window.loggedUser?.watched || [];
+            if (watchedArray.length === 0) {
+                grid.innerHTML = '<p style="color:#666; padding: 20px 0; grid-column: 1/-1;">Nenhum título marcado como assistido ainda.</p>';
+            } else {
+                watchedArray.forEach(id => {
+                    const movie = window.movies.find(m => m.id === id);
+                    if (movie) {
+                        const wrapper = createPosterWrapper(movie);
+                        wrapper.style.width = '100%';
+                        grid.appendChild(wrapper);
+                    }
+                });
+            }
+
+            view.style.display = 'block';
+            window.scrollTo(0, 0);
+        };
+
+        window.closeWatchedScreen = function() {
+            document.getElementById('watchedView').style.display = 'none';
+            window.resetSearch();
+        };
+
+        // =========================================== //
+        // MODO GRADE / CARROSSEL                      //
+        // =========================================== //
+        let isGridMode = false;
+
+        window.toggleViewMode = function() {
+            isGridMode = !isGridMode;
+            const catalog = document.getElementById('catalog');
+            const btn = document.getElementById('viewToggleBtn');
+
+            if (isGridMode) {
+                catalog.classList.add('grid-mode');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`;
+                btn.title = 'Voltar para carrossel';
+            } else {
+                catalog.classList.remove('grid-mode');
+                btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`;
+                btn.title = 'Modo grade';
+            }
+        };
+
+        function showViewToggle(visible) {
+            const btn = document.getElementById('viewToggleBtn');
+            if (visible) btn.classList.add('visible');
+            else btn.classList.remove('visible');
+        }
+
+        // =========================================== //
+        // ESTATÍSTICAS                                //
+        // =========================================== //
+        function hideMainContent() {
+            document.getElementById('heroCarouselWrapper').style.display = 'none';
+            document.getElementById('carouselDots').style.display = 'none';
+            document.getElementById('catalog').style.display = 'none';
+            document.getElementById('searchResultsTitle').style.display = 'none';
+            document.getElementById('searchGrid').style.display = 'none';
+            document.getElementById('sortControls').classList.remove('visible');
+            showViewToggle(false);
+        }
+
+        window.openStatsView = function() {
+            hideMainContent();
+            document.getElementById('statsView').classList.add('visible');
+            // Troca "Estatísticas" por "← Voltar" no nav desktop
+            const navItem = document.getElementById('statsNavItem');
+            if (navItem) navItem.innerHTML = `<a onclick="closeStatsView()" style="color: var(--accent-color);">← Voltar</a>`;
+            // Troca pílula mobile
+            const pill = document.getElementById('statsMobilePill');
+            if (pill) { pill.textContent = '← Voltar'; pill.onclick = closeStatsView; }
+            window.scrollTo(0, 0);
+            renderStats();
+        };
+
+        window.closeStatsView = function() {
+            document.getElementById('statsView').classList.remove('visible');
+            // Restaura "Estatísticas" no nav desktop
+            const navItem = document.getElementById('statsNavItem');
+            if (navItem) navItem.innerHTML = `<a onclick="openStatsView()">Estatísticas</a>`;
+            // Restaura pílula mobile
+            const pill = document.getElementById('statsMobilePill');
+            if (pill) { pill.textContent = '📊 Stats'; pill.onclick = openStatsView; }
+            window.resetSearch();
+        };
+
+        function renderStats() {
+            const all = window.movies;
+            const films = all.filter(m => m.type === 'Filme');
+            const series = all.filter(m => m.type === 'Série');
+            const watched = window.loggedUser?.watched || [];
+
+            // KPIs
+            document.getElementById('statsSubtitle').textContent =
+                `${all.length} títulos catalogados na sua estante`;
+
+            const kpiData = [
+                { number: all.length,     label: 'Total de Títulos' },
+                { number: films.length,   label: 'Filmes' },
+                { number: series.length,  label: 'Séries' },
+                { number: watched.length, label: 'Assistidos' },
+            ];
+            const kpiGrid = document.getElementById('statsKpiGrid');
+            kpiGrid.innerHTML = '';
+            kpiData.forEach(k => {
+                kpiGrid.innerHTML += `
+                    <div class="stat-kpi">
+                        <div class="stat-kpi-number">${k.number}</div>
+                        <div class="stat-kpi-label">${k.label}</div>
+                    </div>`;
+            });
+
+            // Por categoria
+            const catCounts = {};
+            all.forEach(m => {
+                const cats = Array.isArray(m.category) ? m.category : [m.category];
+                cats.forEach(c => { catCounts[c] = (catCounts[c] || 0) + 1; });
+            });
+            const sortedCats = Object.entries(catCounts).sort((a, b) => b[1] - a[1]);
+            const maxCat = sortedCats[0]?.[1] || 1;
+
+            const catBars = document.getElementById('statsCategoryBars');
+            catBars.innerHTML = '';
+            sortedCats.forEach(([cat, count]) => {
+                const pct = Math.round((count / maxCat) * 100);
+                catBars.innerHTML += `
+                    <div class="stats-bar-item">
+                        <span class="stats-bar-name">${cat}</span>
+                        <div class="stats-bar-track">
+                            <div class="stats-bar-fill" style="width:0%" data-width="${pct}%"></div>
+                        </div>
+                        <span class="stats-bar-count">${count}</span>
+                    </div>`;
+            });
+
+            // Anima as barras após inserir no DOM
+            requestAnimationFrame(() => {
+                catBars.querySelectorAll('.stats-bar-fill').forEach(el => {
+                    el.style.width = el.dataset.width;
+                });
+            });
+
+            // Por década
+            const decadeCounts = {};
+            all.forEach(m => {
+                const y = parseInt(m.year);
+                if (!y) return;
+                const decade = Math.floor(y / 10) * 10;
+                decadeCounts[decade] = (decadeCounts[decade] || 0) + 1;
+            });
+            const sortedDecades = Object.entries(decadeCounts).sort((a, b) => a[0] - b[0]);
+
+            const decadeChips = document.getElementById('statsDecadeChips');
+            decadeChips.innerHTML = '';
+            sortedDecades.forEach(([decade, count]) => {
+                decadeChips.innerHTML += `
+                    <div class="decade-chip">
+                        <strong>${decade}s</strong> ${count} título${count > 1 ? 's' : ''}
+                    </div>`;
+            });
+        }
+
+
 
 
         function toggleSearch() {
@@ -5863,10 +6299,8 @@
         function filterByType(type) {
             currentFilter = type;
             const filtered = movies.filter(m => m.type === type);
-            
             currentFilteredMovies = filtered;
             currentSortOrder = 'default';
-
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
@@ -5874,7 +6308,7 @@
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
             showSortControls(false);
-            
+            showViewToggle(true);
             renderCatalog(filtered);
         }
 
@@ -5937,6 +6371,19 @@
             currentFilter = null;
             currentFilteredMovies = [];
             showSortControls(false);
+            showViewToggle(false);
+            isGridMode = false;
+            document.getElementById('catalog').classList.remove('grid-mode');
+            document.getElementById('statsView').classList.remove('visible');
+            // Restaura nav de stats caso estivesse em "← Voltar"
+            const navItem = document.getElementById('statsNavItem');
+            if (navItem && navItem.querySelector('a') && navItem.querySelector('a').textContent.includes('Voltar')) {
+                navItem.innerHTML = `<a onclick="openStatsView()">Estatísticas</a>`;
+            }
+            const pill = document.getElementById('statsMobilePill');
+            if (pill && pill.textContent.includes('Voltar')) {
+                pill.textContent = '📊 Stats'; pill.onclick = openStatsView;
+            }
             
             if(document.getElementById('mobileSearchInput')) document.getElementById('mobileSearchInput').value = '';
             const searchInput = document.getElementById('searchInput');
