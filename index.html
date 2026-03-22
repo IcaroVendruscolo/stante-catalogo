@@ -559,6 +559,47 @@
             display: none;
         }
 
+        /* Sort Controls */
+        .sort-controls {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin: -10px 4% 18px;
+        }
+        .sort-controls.visible {
+            display: flex;
+        }
+        .sort-label {
+            font-size: 0.82rem;
+            color: #888;
+            white-space: nowrap;
+        }
+        .sort-select {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #e5e5e5;
+            font-size: 0.82rem;
+            font-family: inherit;
+            padding: 5px 28px 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .sort-select:hover {
+            border-color: rgba(255,255,255,0.4);
+            background-color: rgba(255,255,255,0.12);
+        }
+        .sort-select option {
+            background: #1a1a1a;
+            color: white;
+        }
+
         .search-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1186,6 +1227,14 @@
         </div>
 
     <h2 id="searchResultsTitle" class="search-results-title"></h2>
+    <div id="sortControls" class="sort-controls">
+        <span class="sort-label">Ordenar por</span>
+        <select id="sortSelect" class="sort-select" onchange="applySortOrder()">
+            <option value="default">Padrão</option>
+            <option value="year_asc">Ano (mais antigo)</option>
+            <option value="year_desc">Ano (mais novo)</option>
+        </select>
+    </div>
     <div id="searchGrid" class="search-grid"></div>
 
     <main id="catalog" class="catalog"></main>
@@ -5406,6 +5455,68 @@
             originalInput.dispatchEvent(new Event('input', { bubbles: true }));
         };
 
+        // =========================================== //
+        // ORDENAÇÃO                                   //
+        // =========================================== //
+        let currentSortOrder = 'default';
+        let currentFilteredMovies = []; // guarda os filmes do filtro ativo para re-ordenar
+
+        function sortMovies(list) {
+            const sorted = [...list];
+            if (currentSortOrder === 'year_asc') {
+                sorted.sort((a, b) => {
+                    const ya = parseInt(a.year) || 0;
+                    const yb = parseInt(b.year) || 0;
+                    return ya - yb;
+                });
+            } else if (currentSortOrder === 'year_desc') {
+                sorted.sort((a, b) => {
+                    const ya = parseInt(a.year) || 0;
+                    const yb = parseInt(b.year) || 0;
+                    return yb - ya;
+                });
+            }
+            return sorted;
+        }
+
+        function showSortControls(visible) {
+            const el = document.getElementById('sortControls');
+            if (visible) {
+                el.classList.add('visible');
+            } else {
+                el.classList.remove('visible');
+                // Reset o select ao esconder
+                document.getElementById('sortSelect').value = 'default';
+                currentSortOrder = 'default';
+            }
+        }
+
+        window.applySortOrder = function() {
+            currentSortOrder = document.getElementById('sortSelect').value;
+            const sorted = sortMovies(currentFilteredMovies);
+
+            // Re-renderiza dependendo do contexto ativo
+            const searchGrid = document.getElementById('searchGrid');
+            const catalog = document.getElementById('catalog');
+
+            if (searchGrid.style.display === 'grid') {
+                // Contexto: busca por texto
+                searchGrid.innerHTML = '';
+                sorted.forEach(movie => {
+                    const img = document.createElement('img');
+                    img.className = 'poster';
+                    img.src = movie.poster;
+                    img.alt = movie.title;
+                    img.referrerPolicy = 'no-referrer';
+                    img.onclick = () => openModal(movie);
+                    searchGrid.appendChild(img);
+                });
+            } else {
+                // Contexto: filtro por categoria ou tipo
+                renderCatalog(sorted);
+            }
+        };
+
         function filterByCategory(category) {
             currentFilter = category;
             // Verifica se a categoria está na string ou dentro do array de categorias do filme
@@ -5413,12 +5524,17 @@
                 Array.isArray(m.category) ? m.category.includes(category) : m.category === category
             );
             
+            currentFilteredMovies = filtered;
+            currentSortOrder = 'default';
+            document.getElementById('sortSelect').value = 'default';
+
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
             document.getElementById('searchResultsTitle').textContent = category;
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
+            showSortControls(true);
             
             renderCatalog(filtered);
         }        
@@ -5726,12 +5842,17 @@
             currentFilter = type;
             const filtered = movies.filter(m => m.type === type);
             
+            currentFilteredMovies = filtered;
+            currentSortOrder = 'default';
+            document.getElementById('sortSelect').value = 'default';
+
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
             document.getElementById('searchResultsTitle').style.display = 'block';
             document.getElementById('searchResultsTitle').textContent = type === 'Filme' ? 'Filmes' : 'Séries';
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
+            showSortControls(true);
             
             renderCatalog(filtered);
         }
@@ -5754,10 +5875,14 @@
                     searchGrid.style.display = 'grid';
                     
                     const results = movies.filter(m => m.title.toLowerCase().includes(query));
+                    currentFilteredMovies = results;
+                    currentSortOrder = 'default';
+                    document.getElementById('sortSelect').value = 'default';
                     
                     searchGrid.innerHTML = '';
                     if (results.length > 0) {
                         searchResultsTitle.textContent = `Resultados para "${query}"`;
+                        showSortControls(true);
                         results.forEach(movie => {
                             const img = document.createElement('img');
                             img.className = 'poster';
@@ -5769,8 +5894,10 @@
                         });
                     } else {
                         searchResultsTitle.textContent = `Nenhum resultado encontrado para "${query}"`;
+                        showSortControls(false);
                     }
                 } else {
+                    showSortControls(false);
                     // CORREÇÃO: Verificando que tipo de filtro estava ativo antes da busca
                     if (currentFilter) {
                        if (categories.includes(currentFilter)) {
@@ -5787,6 +5914,8 @@
 
         function resetSearch() {
             currentFilter = null;
+            currentFilteredMovies = [];
+            showSortControls(false);
             
             if(document.getElementById('mobileSearchInput')) document.getElementById('mobileSearchInput').value = '';
             const searchInput = document.getElementById('searchInput');
