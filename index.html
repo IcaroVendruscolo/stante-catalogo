@@ -1252,9 +1252,385 @@
             padding: 0 15px; 
         }
 
-        .rating-badges { display: flex; gap: 15px; margin-bottom: 20px; font-family: Arial, sans-serif;}
-        .badge-imdb { background-color: #f5c518; color: #000; font-weight: 900; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; letter-spacing: -0.5px;}
-        .badge-rt { background-color: #fa320a; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem; display: flex; align-items: center; gap: 5px;}
+        /* ================================ */
+        /* MODAL ESTILO DISNEY+             */
+        /* ================================ */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: #181818;
+            width: 100%;
+            max-width: 860px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transform: scale(0.92) translateY(20px);
+            transition: transform 0.35s cubic-bezier(0.25,1,0.5,1);
+            display: flex;
+            flex-direction: column;
+            max-height: 92vh;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+        }
+        .modal-overlay.active .modal {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Hero banner no topo do modal */
+        .modal-hero {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/7;
+            background: #111;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .modal-hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            display: block;
+        }
+        .modal-hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%; height: 65%;
+            background: linear-gradient(to top, #181818 0%, transparent 100%);
+            pointer-events: none;
+        }
+        /* Iframe do trailer dentro do hero */
+        .modal-trailer-frame {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 2;
+        }
+        /* Botão play sobre o hero */
+        .modal-play-btn {
+            position: absolute;
+            bottom: 18px;
+            left: 20px;
+            z-index: 5;
+            background: white;
+            color: black;
+            border: none;
+            border-radius: 6px;
+            padding: 9px 22px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .modal-play-btn:hover { background: #e5e5e5; transform: scale(1.04); }
+        .modal-play-btn.playing {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .modal-play-btn.playing:hover { background: rgba(0,0,0,0.8); }
+
+        /* Corpo do modal (info + reviews) */
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+        }
+        .modal-body::-webkit-scrollbar { width: 4px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+
+        .modal-info {
+            padding: 0 24px 6px;
+        }
+        .modal-title {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 8px;
+            line-height: 1.1;
+        }
+        .modal-meta {
+            color: #aaa;
+            font-size: 0.88rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .modal-meta span { margin-right: 0; }
+        .modal-meta-dot {
+            width: 3px; height: 3px;
+            background: #555;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .modal-desc {
+            font-size: 0.92rem;
+            line-height: 1.65;
+            color: #ccc;
+            margin-bottom: 16px;
+        }
+        .modal-details {
+            margin-bottom: 6px;
+        }
+        .modal-details p {
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .modal-details strong { color: #666; }
+        .modal-details span { color: #ccc; }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.2); }
+
+        .modal-location {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(229,9,20,0.12);
+            border: 1px solid rgba(229,9,20,0.4);
+            border-radius: 6px;
+            color: var(--accent-color);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        /* Seção "Também nesta coleção" */
+        .modal-related {
+            padding: 16px 24px 20px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .modal-related-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 14px;
+        }
+        .modal-related-row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .modal-related-row::-webkit-scrollbar { display: none; }
+        .modal-related-item {
+            flex: 0 0 auto;
+            width: 90px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .modal-related-item:hover { transform: scale(1.06); }
+        .modal-related-item img {
+            width: 100%;
+            aspect-ratio: 2/3;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+            background: #222;
+        }
+        .modal-related-item span {
+            display: block;
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 5px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Highlight do filme atual na row relacionados */
+        .modal-related-item.current img {
+            outline: 2px solid var(--accent-color);
+        }
+
+        /* Ações do modal (lista + local) */
+        .modal-actions-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin: 14px 0 18px;
+            flex-wrap: wrap;
+        }
+
+        /* Reviews dentro do modal */
+        .reviews-section {
+            background: rgba(255,255,255,0.04);
+            padding: 18px 24px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+        }
+
+        /* ================================ */
+        /* ANIMAÇÃO DVD NOVA (caixinha)     */
+        /* ================================ */
+        .dvd-loading-overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.96);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+        }
+        .dvd-scene {
+            position: relative;
+            width: 160px;
+            height: 180px;
+        }
+        /* Caixinha de DVD */
+        .dvd-box {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 130px;
+            background: linear-gradient(145deg, #1a1a2e, #16213e, #0f3460);
+            border-radius: 4px 4px 6px 6px;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+        .dvd-box::before {
+            content: 'DVD';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.65rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            color: rgba(255,255,255,0.15);
+        }
+        /* Slot no topo da caixa */
+        .dvd-box-slot {
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 6px;
+            background: #0a0a0a;
+            border-radius: 3px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        /* O disco em si */
+        .dvd-disc-new {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(0) rotate(0deg);
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 50% 50%, #111 14%, transparent 14%),
+                conic-gradient(
+                    from 0deg,
+                    hsla(0,80%,60%,0.7), hsla(60,80%,60%,0.7),
+                    hsla(120,80%,60%,0.7), hsla(180,80%,60%,0.7),
+                    hsla(240,80%,60%,0.7), hsla(300,80%,60%,0.7),
+                    hsla(360,80%,60%,0.7)
+                ),
+                linear-gradient(135deg, #c0c0c0, #f0f0f0, #a0a0a0);
+            box-shadow:
+                0 0 0 2px #333,
+                0 0 20px rgba(150,100,255,0.3),
+                0 4px 20px rgba(0,0,0,0.8);
+            z-index: 10;
+        }
+        /* Buraco central do disco */
+        .dvd-disc-new::after {
+            content: '';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #0a0a0a;
+            border: 1px solid #333;
+        }
+
+        @keyframes dvdEject {
+            0%   { transform: translateX(-50%) translateY(60px) rotate(0deg); opacity: 0; }
+            15%  { opacity: 1; }
+            40%  { transform: translateX(-50%) translateY(-20px) rotate(180deg); }
+            65%  { transform: translateX(-50%) translateY(-30px) rotate(540deg); }
+            80%  { transform: translateX(-50%) translateY(-25px) rotate(700deg); }
+            100% { transform: translateX(-50%) translateY(-28px) rotate(900deg); opacity: 1; }
+        }
+        @keyframes dvdSpin {
+            from { transform: translateX(-50%) translateY(-28px) rotate(0deg); }
+            to   { transform: translateX(-50%) translateY(-28px) rotate(360deg); }
+        }
+
+        .dvd-disc-new.ejecting {
+            animation: dvdEject 1.4s cubic-bezier(0.25,1,0.5,1) forwards;
+        }
+        .dvd-disc-new.spinning {
+            animation: dvdSpin 0.6s linear infinite;
+        }
+
+        .dvd-loading-text {
+            color: #ccc;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            animation: pulseText 1.2s ease-in-out infinite alternate;
+        }
+        @keyframes pulseText { from { opacity: 0.4; } to { opacity: 1; } }
+        .rating-badges { display: flex; gap: 10px; margin-bottom: 16px; font-family: Arial, sans-serif; }
+        .badge-imdb { background-color: #f5c518; color: #000; font-weight: 900; padding: 4px 8px; border-radius: 4px; font-size: 0.82rem; display: flex; align-items: center; gap: 4px; letter-spacing: -0.5px; }
+        .badge-rt { background-color: #fa320a; color: #fff; font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 0.82rem; display: flex; align-items: center; gap: 4px; }
 
         /* ================================ */
         /* MODAL DA ROLETA E PÍLULAS        */
@@ -1271,25 +1647,6 @@
 
         .draw-btn { background-color: #ddd; color: #aaa; border: none; padding: 15px 40px; border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: not-allowed; transition: all 0.3s; }
         .draw-btn.active { background-color: var(--accent-color); color: white; cursor: pointer; box-shadow: 0 5px 15px rgba(229, 9, 20, 0.4); transform: scale(1.05); }
-
-        /* ================================ */
-        /* ANIMAÇÃO DO DVD                  */
-        /* ================================ */
-        .dvd-loading-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .dvd-animation-container { position: relative; width: 150px; height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; margin-bottom: 20px; }
-        .dvd-player-slot { width: 120px; height: 12px; background: #333; border-radius: 10px; border: 2px solid #555; z-index: 10; }
-        .dvd-disc { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(45deg, #e6e6e6, #fff, #ccc); border: 15px solid #111; position: absolute; bottom: 5px; z-index: 5; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-        .dvd-hole { width: 20px; height: 20px; border-radius: 50%; background: transparent; border: 2px solid #ddd; }
-        .dvd-loading-text { color: white; font-size: 1.2rem; animation: pulseText 1s infinite alternate; font-weight: normal; }
-        
-        @keyframes pulseText { from { opacity: 0.5; } to { opacity: 1; } }
-        @keyframes insertDvd { 
-            0% { transform: translateY(-80px) rotate(0deg); opacity: 0; }
-            30% { transform: translateY(-40px) rotate(180deg); opacity: 1; }
-            70% { transform: translateY(-40px) rotate(360deg); opacity: 1; }
-            100% { transform: translateY(10px) rotate(540deg); opacity: 0; }
-        }
-        .animating-dvd { animation: insertDvd 2.5s ease-in-out forwards; }
 
     </style>
 </head>
@@ -1475,54 +1832,67 @@
     <div id="modal" class="modal-overlay">
         <div class="modal">
             <button class="modal-close" onclick="closeModal()">×</button>
-            <img id="modalPoster" class="modal-poster" src="" alt="Poster">
-            <div class="modal-info">
-                <h2 id="modalTitle" class="modal-title"></h2>
-                <div class="modal-meta">
-                    <span id="modalYear"></span>
-                    <span id="modalCategory"></span>
-                </div>
-                <div class="rating-badges">
-                    <div class="badge-imdb">IMDb <span id="modalImdb"></span></div>
-                    <div class="badge-rt">🍅 <span id="modalRt"></span></div>
-                </div>
-                <p id="modalDesc" class="modal-desc"></p>
-                <div class="modal-details">
-                    <p><strong>Diretor:</strong> <span id="modalDirector"></span></p>
-                    <p><strong>Elenco:</strong> <span id="modalCast"></span></p>
-                </div>
-                
-                <div class="modal-actions-row">
-                    <div id="modalLocation" class="modal-location"></div>
-                    <div class="my-list-add-btn" onclick="window.toggleMyList()">
-                        <span id="myListIcon" class="my-list-icon">+</span>
-                        <span class="my-list-text">Minha Lista</span>
+
+            <!-- Hero banner + trailer -->
+            <div class="modal-hero" id="modalHero">
+                <img id="modalHeroImg" class="modal-hero-img" src="" alt="">
+                <button class="modal-play-btn" id="modalPlayBtn" onclick="toggleTrailer()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+                    Trailer
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-info">
+                    <h2 id="modalTitle" class="modal-title"></h2>
+                    <div class="modal-meta">
+                        <span id="modalYear"></span>
+                        <span class="modal-meta-dot"></span>
+                        <span id="modalCategory"></span>
+                    </div>
+                    <div class="rating-badges">
+                        <div class="badge-imdb">IMDb <span id="modalImdb"></span></div>
+                        <div class="badge-rt">🍅 <span id="modalRt"></span></div>
+                    </div>
+                    <p id="modalDesc" class="modal-desc"></p>
+                    <div class="modal-details">
+                        <p><strong>Diretor:</strong> <span id="modalDirector"></span></p>
+                        <p><strong>Elenco:</strong> <span id="modalCast"></span></p>
+                    </div>
+                    <div class="modal-actions-row">
+                        <div id="modalLocation" class="modal-location"></div>
+                        <div class="my-list-add-btn" onclick="window.toggleMyList()">
+                            <span id="myListIcon" class="my-list-icon">+</span>
+                            <span class="my-list-text">Minha Lista</span>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Filmes relacionados (mesma coleção) -->
+                <div class="modal-related" id="modalRelated" style="display:none;">
+                    <p class="modal-related-title" id="modalRelatedTitle">Também nesta coleção</p>
+                    <div class="modal-related-row" id="modalRelatedRow"></div>
+                </div>
+
+                <!-- Comentários -->
                 <div class="reviews-section">
-                    <h3 style="margin-bottom: 10px; font-size: 1.1rem; color: #ccc;">Comentários</h3>
-                    
+                    <h3 style="margin-bottom: 10px; font-size: 1rem; color: #ccc;">Comentários</h3>
                     <div id="fakeReviewInput" class="fake-review-input" onclick="window.expandReviewBox()">
                         Adicione um comentário...
                     </div>
-
                     <div id="realReviewBox" class="review-input-box" style="display: none;">
                         <div class="star-rating" id="starRating">
                             <span data-value="1">★</span><span data-value="2">★</span><span data-value="3">★</span><span data-value="4">★</span><span data-value="5">★</span>
                         </div>
                         <textarea id="reviewText" placeholder="Escreva seu comentário aqui..." maxlength="250"></textarea>
-                        
                         <div class="review-action-buttons">
                             <button id="cancelEditBtn" onclick="window.cancelEditReview()">Cancelar</button>
                             <button id="submitReviewBtn" class="btn-primary" onclick="window.submitReview()">Publicar</button>
                         </div>
                     </div>
-
-                    <div id="reviewsList" class="reviews-list">
-                        </div>
+                    <div id="reviewsList" class="reviews-list"></div>
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
 
@@ -1981,13 +2351,21 @@
             
             closeRoulette();
             const dvdOverlay = document.getElementById('dvdLoading');
-            const disc = document.querySelector('.dvd-disc');
+            const disc = document.getElementById('dvdDisc');
             
-            // Inicia animação
+            // Mostra overlay e reseta classes do disco
             dvdOverlay.style.display = 'flex';
-            disc.classList.remove('animating-dvd');
-            void disc.offsetWidth; // Truque para reiniciar a animação
-            disc.classList.add('animating-dvd');
+            disc.classList.remove('ejecting', 'spinning');
+            void disc.offsetWidth; // Força reflow para reiniciar animação
+
+            // Fase 1: disco ejetando da caixa (1.4s)
+            disc.classList.add('ejecting');
+
+            // Fase 2: após ejetar, fica girando continuamente
+            setTimeout(() => {
+                disc.classList.remove('ejecting');
+                disc.classList.add('spinning');
+            }, 1400);
 
             // Pega todos os filmes que batem com as categorias escolhidas
             let possibleMovies = window.movies.filter(m => {
@@ -1996,18 +2374,16 @@
                 }
                 return selectedRouletteCategories.includes(m.category);
             });
-
-            // Se a pessoa escolher uma categoria que não tem filmes (segurança)
             if(possibleMovies.length === 0) possibleMovies = window.movies;
 
-            // Sorteia 1
             const randomMovie = possibleMovies[Math.floor(Math.random() * possibleMovies.length)];
 
-            // Espera a animação acabar (2.5 segundos) e abre o filme
+            // Espera 3s no total e abre o modal
             setTimeout(() => {
+                disc.classList.remove('spinning');
                 dvdOverlay.style.display = 'none';
                 window.openModal(randomMovie);
-            }, 2500);
+            }, 3000);
         };
 
         // 5. Injetar as Notas Simuladas no Modal
@@ -2145,13 +2521,56 @@
             }
         };
 
-        // 3. LÓGICA DO LETTERBOXD (Avaliações ao vivo)
+        // 3. LÓGICA DO MODAL (Disney+ style)
+        let trailerActive = false;
+
+        window.toggleTrailer = function() {
+            const hero = document.getElementById('modalHero');
+            const playBtn = document.getElementById('modalPlayBtn');
+            const movie = window.movies.find(m => m.id === currentOpenMovieId);
+            if (!movie || !movie.trailer) return;
+
+            if (trailerActive) {
+                // Fecha o trailer
+                const frame = hero.querySelector('.modal-trailer-frame');
+                if (frame) frame.remove();
+                trailerActive = false;
+                playBtn.classList.remove('playing');
+                playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Trailer`;
+            } else {
+                // Abre o trailer
+                const frame = document.createElement('iframe');
+                frame.className = 'modal-trailer-frame';
+                frame.src = movie.trailer + '?autoplay=1&rel=0';
+                frame.allow = 'autoplay; fullscreen';
+                frame.allowFullscreen = true;
+                hero.appendChild(frame);
+                trailerActive = true;
+                playBtn.classList.add('playing');
+                playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Fechar`;
+            }
+        };
+
         window.openModal = function(movie) {
             currentOpenMovieId = movie.id;
+            trailerActive = false;
             const modal = document.getElementById('modal');
-            
-            // Preenche dados normais
-            document.getElementById('modalPoster').src = movie.poster;
+
+            // Remove trailer anterior se houver
+            const oldFrame = document.querySelector('.modal-trailer-frame');
+            if (oldFrame) oldFrame.remove();
+
+            // Hero: usa heroImage se tiver, senão usa o poster
+            const heroImg = document.getElementById('modalHeroImg');
+            heroImg.src = movie.heroImage || movie.poster;
+
+            // Botão trailer: mostra só se o filme tiver campo trailer
+            const playBtn = document.getElementById('modalPlayBtn');
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg> Trailer`;
+            playBtn.style.display = movie.trailer ? 'flex' : 'none';
+
+            // Dados textuais
             document.getElementById('modalTitle').textContent = movie.title;
             document.getElementById('modalYear').textContent = movie.year;
             document.getElementById('modalCategory').textContent = Array.isArray(movie.category) ? movie.category.join(', ') : movie.category;
@@ -2159,49 +2578,59 @@
             document.getElementById('modalDirector').textContent = movie.director;
             document.getElementById('modalCast').textContent = movie.cast;
             document.getElementById('modalLocation').textContent = `📍 ${movie.location}`;
-            
-            // Injeta as notas IMDb e RT
+
             injectRatings(movie.id);
-            
-            // Checa se tá na Minha Lista
+
+            // Minha Lista
             let myListArray = window.loggedUser.myList || [];
             document.getElementById('myListIcon').textContent = myListArray.includes(movie.id) ? '✓' : '+';
 
-            // Recolhe a caixa de comentários
+            // Filmes relacionados (verifica se pertence a alguma coleção)
+            const relatedSection = document.getElementById('modalRelated');
+            const relatedRow = document.getElementById('modalRelatedRow');
+            const relatedTitle = document.getElementById('modalRelatedTitle');
+            relatedRow.innerHTML = '';
+
+            const belongsTo = collections.find(c => c.movieIds.includes(movie.id));
+            if (belongsTo && belongsTo.movieIds.length > 1) {
+                relatedTitle.textContent = `Também em: ${belongsTo.title}`;
+                belongsTo.movieIds.forEach(id => {
+                    const rel = window.movies.find(m => m.id === id);
+                    if (!rel) return;
+                    const item = document.createElement('div');
+                    item.className = 'modal-related-item' + (id === movie.id ? ' current' : '');
+                    item.innerHTML = `<img src="${rel.poster}" alt="${rel.title}" loading="lazy"><span>${rel.title}</span>`;
+                    item.onclick = () => window.openModal(rel);
+                    relatedRow.appendChild(item);
+                });
+                relatedSection.style.display = 'block';
+            } else {
+                relatedSection.style.display = 'none';
+            }
+
+            // Comentários
             if(window.cancelEditReview) window.cancelEditReview();
-
-            // Variável Global para saber se estamos editando
             window.editingReviewId = null;
-
-            // Escuta Comentários AO VIVO no Firebase
-            if(reviewsUnsubscribe) reviewsUnsubscribe(); 
+            if(reviewsUnsubscribe) reviewsUnsubscribe();
             const q = query(collection(db, "reviews"), where("movieId", "==", movie.id));
-            
             reviewsUnsubscribe = onSnapshot(q, (snapshot) => {
                 const reviews = [];
                 snapshot.forEach(d => reviews.push({ id: d.id, ...d.data() }));
-                reviews.sort((a, b) => b.timestamp - a.timestamp); 
-                
+                reviews.sort((a, b) => b.timestamp - a.timestamp);
                 const listEl = document.getElementById('reviewsList');
                 listEl.innerHTML = '';
-                
                 if(reviews.length === 0) {
-                    listEl.innerHTML = '<p style="color: #666; font-size: 0.9rem;">Seja o primeiro a avaliar.</p>';
+                    listEl.innerHTML = '<p style="color:#666;font-size:0.88rem;">Seja o primeiro a avaliar.</p>';
                 } else {
                     reviews.forEach(r => {
                         const starsHTML = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
                         let actionsHTML = '';
-                        
-                        // SEGREDO DE SEGURANÇA: Só mostra botões se o dono logado for igual ao dono do post
                         if (window.loggedUser && r.profileId === window.loggedUser.id) {
-                            actionsHTML = `
-                                <div class="review-actions">
-                                    <button onclick="window.editReview('${r.id}', '${r.text.replace(/'/g, "\\'")}', ${r.rating})">Editar</button>
-                                    <button onclick="window.deleteReview('${r.id}')">Excluir</button>
-                                </div>
-                            `;
+                            actionsHTML = `<div class="review-actions">
+                                <button onclick="window.editReview('${r.id}', '${r.text.replace(/'/g, "\\'")}', ${r.rating})">Editar</button>
+                                <button onclick="window.deleteReview('${r.id}')">Excluir</button>
+                            </div>`;
                         }
-
                         listEl.innerHTML += `
                             <div class="review-item">
                                 <div class="review-header">
@@ -2211,8 +2640,7 @@
                                     ${actionsHTML}
                                 </div>
                                 <div class="review-text">${r.text}</div>
-                            </div>
-                        `;
+                            </div>`;
                     });
                 }
             });
@@ -6439,6 +6867,10 @@
         function closeModal() {
             document.getElementById('modal').classList.remove('active');
             document.body.style.overflow = 'auto';
+            // Remove trailer se estiver ativo
+            const frame = document.querySelector('.modal-trailer-frame');
+            if (frame) frame.remove();
+            trailerActive = false;
         }
 
         // Close modal on outside click
@@ -6477,11 +6909,11 @@
 
 
     <div id="dvdLoading" class="dvd-loading-overlay">
-        <div class="dvd-animation-container">
-            <div class="dvd-disc">
-                <div class="dvd-hole"></div>
+        <div class="dvd-scene">
+            <div class="dvd-disc-new" id="dvdDisc"></div>
+            <div class="dvd-box">
+                <div class="dvd-box-slot"></div>
             </div>
-            <div class="dvd-player-slot"></div>
         </div>
         <h2 class="dvd-loading-text">Procurando na estante...</h2>
     </div>
