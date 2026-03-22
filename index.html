@@ -564,7 +564,9 @@
             display: none;
             align-items: center;
             gap: 10px;
-            margin: -10px 4% 18px;
+            margin: 0 4% 18px;
+            position: relative;
+            z-index: 10;
         }
         .sort-controls.visible {
             display: flex;
@@ -5481,23 +5483,28 @@
 
         function showSortControls(visible) {
             const el = document.getElementById('sortControls');
+            if (!el) return;
             if (visible) {
                 el.classList.add('visible');
+                // Sincroniza o valor do select fixo com o estado atual
+                const sel = document.getElementById('sortSelect');
+                if (sel) sel.value = currentSortOrder;
             } else {
                 el.classList.remove('visible');
-                // Reset o select ao esconder
-                document.getElementById('sortSelect').value = 'default';
+                const sel = document.getElementById('sortSelect');
+                if (sel) sel.value = 'default';
                 currentSortOrder = 'default';
             }
         }
 
         window.applySortOrder = function() {
-            currentSortOrder = document.getElementById('sortSelect').value;
+            // Pega o select ativo — inline (catalog) ou fixo (busca por texto)
+            const selectEl = document.getElementById('sortSelectInline') || document.getElementById('sortSelect');
+            if (!selectEl) return;
+            currentSortOrder = selectEl.value;
             const sorted = sortMovies(currentFilteredMovies);
 
-            // Re-renderiza dependendo do contexto ativo
             const searchGrid = document.getElementById('searchGrid');
-            const catalog = document.getElementById('catalog');
 
             if (searchGrid.style.display === 'grid') {
                 // Contexto: busca por texto
@@ -5526,7 +5533,6 @@
             
             currentFilteredMovies = filtered;
             currentSortOrder = 'default';
-            document.getElementById('sortSelect').value = 'default';
 
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
@@ -5534,7 +5540,7 @@
             document.getElementById('searchResultsTitle').textContent = category;
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
-            showSortControls(true);
+            showSortControls(false);
             
             renderCatalog(filtered);
         }        
@@ -5733,6 +5739,22 @@
             const catalogEl = document.getElementById('catalog');
             if (!catalogEl) return;
             catalogEl.innerHTML = '';
+
+            // Se há filtro ativo (categoria ou tipo), injeta o seletor DENTRO do catalog
+            if (currentFilter) {
+                const sortHTML = `
+                    <div id="sortControlsInline" class="sort-controls visible" style="margin: 10px 4% 18px;">
+                        <span class="sort-label">Ordenar por</span>
+                        <select id="sortSelectInline" class="sort-select" onchange="applySortOrder()">
+                            <option value="default" ${currentSortOrder === 'default' ? 'selected' : ''}>Padrão</option>
+                            <option value="year_asc" ${currentSortOrder === 'year_asc' ? 'selected' : ''}>Ano (mais antigo)</option>
+                            <option value="year_desc" ${currentSortOrder === 'year_desc' ? 'selected' : ''}>Ano (mais novo)</option>
+                        </select>
+                    </div>`;
+                catalogEl.insertAdjacentHTML('beforeend', sortHTML);
+                // Esconde o sortControls fixo (usado só na busca por texto)
+                document.getElementById('sortControls').classList.remove('visible');
+            }
             
             // Only show Destaques and Collections on the main view (no filter active)
             if (!currentFilter && filteredMovies === movies) {
@@ -5844,7 +5866,6 @@
             
             currentFilteredMovies = filtered;
             currentSortOrder = 'default';
-            document.getElementById('sortSelect').value = 'default';
 
             document.getElementById('heroCarouselWrapper').style.display = 'none';
             document.getElementById('carouselDots').style.display = 'none';
@@ -5852,7 +5873,7 @@
             document.getElementById('searchResultsTitle').textContent = type === 'Filme' ? 'Filmes' : 'Séries';
             document.getElementById('searchGrid').style.display = 'none';
             document.getElementById('catalog').style.display = 'block';
-            showSortControls(true);
+            showSortControls(false);
             
             renderCatalog(filtered);
         }
