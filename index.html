@@ -844,22 +844,23 @@
         .collections-row {
             margin: 0 0 28px;
             padding: 0 4%;
-        }
-
-        .collections-track {
-            display: flex;
-            gap: 12px;
-            background: #3a3838;
-            border-radius: 16px;
-            padding: 18px 20px;
             overflow-x: auto;
             overflow-y: visible;
             -ms-overflow-style: none;
             scrollbar-width: none;
-            /* A largura cresce com o conteúdo, não fica presa na viewport */
-            width: 100%;
         }
-        .collections-track::-webkit-scrollbar { display: none; }
+        .collections-row::-webkit-scrollbar { display: none; }
+
+        .collections-track {
+            display: inline-flex;
+            gap: 12px;
+            background: #3a3838;
+            border-radius: 16px;
+            padding: 18px 20px;
+            /* Cresce até o último poster, nunca fica limitada à viewport */
+            width: max-content;
+            min-width: calc(100% - 0px);
+        }
 
         /* Collection View */
         .collection-view {
