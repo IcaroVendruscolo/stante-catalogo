@@ -842,15 +842,24 @@
 
         /* Tarja cinza atrás das coleções */
         .collections-row {
-            margin: 0 4% 28px;
+            margin: 0 0 28px;
+            padding: 0 4%;
+        }
+
+        .collections-track {
+            display: flex;
+            gap: 12px;
             background: #3a3838;
             border-radius: 16px;
-            overflow: hidden;
-        }
-        .collections-row .row-posters {
             padding: 18px 20px;
-            gap: 12px;
+            overflow-x: auto;
+            overflow-y: visible;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+            /* A largura cresce com o conteúdo, não fica presa na viewport */
+            width: 100%;
         }
+        .collections-track::-webkit-scrollbar { display: none; }
 
         /* Collection View */
         .collection-view {
@@ -6495,7 +6504,7 @@
                 const collRow = document.createElement('div');
                 collRow.className = 'row collections-row';
                 const collContainer = document.createElement('div');
-                collContainer.className = 'row-posters';
+                collContainer.className = 'collections-track';
                 collections.forEach(coll => {
                     const img = document.createElement('img');
                     img.className = 'collection-poster';
